@@ -8,6 +8,8 @@ import com.example.enums.ProfileStep;
 import com.example.repository.ExternalBlockRepository;
 import com.example.repository.InternalBlockRepository;
 import com.example.repository.ProfileRepository;
+import com.example.util.InlineKeyBoardUtil;
+import com.example.util.ReplyKeyboardUtil;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -32,8 +34,9 @@ public class ComparisonService {
         ProfileEntity entity = profileRepository.getProfile(message.getChatId());
         if (entity.getStep().equals(ProfileStep.Done)) {
             sendMessage.setText("Ichki blok seriya raqamining ilk 8 ta belgisini kiriting:");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             ProfileEntity profileEntity = profileRepository.getProfile(message.getChatId());
-            profileEntity.setStep(ProfileStep.Enter_Internal_Block);
+            profileEntity.setStep(ProfileStep.Save_Internal_Block);
             profileRepository.update(profileEntity);
             myTelegramBot.sendMsg(sendMessage);
         }
@@ -43,20 +46,42 @@ public class ComparisonService {
         ProfileEntity entity = profileRepository.getProfile(message.getChatId());
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
-        if (entity.getStep().equals(ProfileStep.Enter_Internal_Block)){
+        if (entity.getStep().equals(ProfileStep.Save_Internal_Block)){
             if (message.getText().length() == 8){
-                internalBlock = internalBlockRepository.get(message.getText());
+                internalBlock = internalBlockRepository.get(message.getText().toLowerCase());
+                if (internalBlock == null){
+                    sendMessage.setText("⛔️ Ichki blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
+                    sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+                    entity.setStep(ProfileStep.Done);
+                    profileRepository.update(entity);
+                    myTelegramBot.sendMsg(sendMessage);
+                    internalBlockEnter(message);
+                    return;
+                }
+                entity.setStep(ProfileStep.Enter_External_Block);
+                profileRepository.update(entity);
             }
         }
-        if (entity.getStep().equals(ProfileStep.Enter_Internal_Block)){
+        if (entity.getStep().equals(ProfileStep.Enter_External_Block)){
             sendMessage.setText("Tashqi blok seriya raqamining ilk 8 ta belgisini kiriting:");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             ProfileEntity profileEntity = profileRepository.getProfile(message.getChatId());
-            profileEntity.setStep(ProfileStep.Enter_External_Block);
+            profileEntity.setStep(ProfileStep.Save_External_Block);
             profileRepository.update(profileEntity);
             myTelegramBot.sendMsg(sendMessage);
-        }else if (entity.getStep().equals(ProfileStep.Enter_External_Block)){
+
+        }else if (entity.getStep().equals(ProfileStep.Save_External_Block)){
             if (message.getText().length() == 8){
-                externalBlock = externalBlockRepository.get(message.getText());
+                externalBlock = externalBlockRepository.get(message.getText().toLowerCase());
+                if (externalBlock == null){
+                    sendMessage.setText("⛔️ Ichki blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
+                    sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+                    myTelegramBot.sendMsg(sendMessage);
+                    entity.setStep(ProfileStep.Enter_External_Block);
+                    profileRepository.update(entity);
+                    externalBlockEnter(message);
+                    return;
+                }
                 comparison(internalBlock,externalBlock,message);
             }
         }
@@ -64,15 +89,24 @@ public class ComparisonService {
     public void comparison(InternalBlockEntity internalBlock, ExternalBlockEntity externalBlock,Message message){
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
-        System.out.println(internalBlock.toString());
-        System.out.println(externalBlock.toString());
+        if (internalBlock!=null){
+            System.out.println(internalBlock.toString());
+        }
+        if (externalBlock!= null){
+            System.out.println(externalBlock.toString());
+        }
         if (internalBlock.getNumber().equals(externalBlock.getNumber())){
             sendMessage.setText("✅ Bu ichki va tashqi bloklar bir biriga mos keladi.");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
             myTelegramBot.sendMsg(sendMessage);
-        }else {
+        }if (!internalBlock.getNumber().equals(externalBlock.getNumber())){
             sendMessage.setText("⛔️Bu ichki va tashqi bloklar bir biriga mos kelmaydi.");
             myTelegramBot.sendMsg(sendMessage);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
         }
+        ProfileEntity entity = profileRepository.getProfile(message.getChatId());
+        entity.setStep(ProfileStep.Done);
+        profileRepository.update(entity);
     }
 
 }

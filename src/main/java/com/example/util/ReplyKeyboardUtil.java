@@ -1,5 +1,6 @@
 package com.example.util;
 
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -32,6 +33,20 @@ public class ReplyKeyboardUtil {
     }
     public static ReplyKeyboardMarkup menuKeyboard2() {
         KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(order);
+        List<KeyboardRow> rowList = new LinkedList<>();
+        rowList.add(row1);
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(rowList);
+        replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
+        replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        return replyKeyboardMarkup;
+    }
+
+    public static ReplyKeyboard cancellation() {
+        KeyboardButton order = button("\uD83D\uDDD1 Bekor qilish");
         KeyboardRow row1 = new KeyboardRow();
         row1.add(order);
         List<KeyboardRow> rowList = new LinkedList<>();

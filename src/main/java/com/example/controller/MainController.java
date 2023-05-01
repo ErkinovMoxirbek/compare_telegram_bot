@@ -38,7 +38,7 @@ public class MainController {
 
     public void handle(String text, Message message) throws MalformedURLException {
         ProfileEntity entity = profileRepository.getProfile(message.getChatId());
-        if (text.equals("/start")) {
+        if (text.equals("/start") || text.equals("\uD83D\uDDD1 Bekor qilish")) {
             if (entity == null){
                 ProfileDTO dto = new ProfileDTO();
                 dto.setId(message.getChatId());
@@ -46,7 +46,7 @@ public class MainController {
                 profileService.create(dto);
                 entity = profileRepository.getProfile(message.getChatId());
             }
-            if (entity.getStep().equals(ProfileStep.Enter_Internal_Block) || entity.getStep().equals(ProfileStep.Enter_External_Block)){
+            if (entity.getStep().equals(ProfileStep.Enter_Internal_Block) || entity.getStep().equals(ProfileStep.Enter_External_Block) || entity.getStep().equals(ProfileStep.Save_External_Block) || entity.getStep().equals(ProfileStep.Save_Internal_Block)){
                 entity.setStep(ProfileStep.Done);
                 profileRepository.update(entity);
             }
@@ -58,8 +58,10 @@ public class MainController {
                 myTelegramBot.sendMsg(sendMessage);
             }
         }else if (text.equals("✅ Bloklarning bir biriga mosligini tekshirish")){
+            entity.setStep(ProfileStep.Done);
+            profileRepository.update(entity);
             comparisonService.internalBlockEnter(message);
-        }else if (entity.getStep().equals(ProfileStep.Enter_Internal_Block)) {
+        }else if (entity.getStep().equals(ProfileStep.Enter_Internal_Block)||entity.getStep().equals(ProfileStep.Save_Internal_Block)||entity.getStep().equals(ProfileStep.Save_External_Block)) {
             comparisonService.externalBlockEnter(message);
         }else if (entity.getStep().equals(ProfileStep.Enter_External_Block)){
             comparisonService.externalBlockEnter(message);

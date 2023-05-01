@@ -1,22 +1,15 @@
 package com.example.repository;
 
 import com.example.entity.InternalBlockEntity;
-import com.example.enums.ProfileStep;
+import org.apache.poi.ss.usermodel.*;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class InternalBlockRepository {
-    public InternalBlockEntity get(String seriya) {
+ /*   ///  text file ///
+
+ public InternalBlockEntity get(String seriya) {
         Optional<InternalBlockEntity> optional = getAll().stream()
                 .filter(p -> p.getBlockSeriya().equals(seriya))
                 .findFirst();
@@ -84,5 +77,56 @@ public class InternalBlockRepository {
             }
         }
         rewriteList(temp);
+    }*/
+    public List<InternalBlockEntity> getListExel(){
+        // faylni yuklash
+        File file = new File("IchkiBlok.xlsx");
+        FileInputStream inputStream = null;
+        Workbook workbook = null;
+        try {
+            inputStream = new FileInputStream(file);
+            workbook = WorkbookFactory.create(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // fayl o'qish uchun mo'ljal
+        Sheet sheet = workbook.getSheetAt(0);
+        int b = 0;
+        int c = 0;
+        DataFormatter dataFormatter = new DataFormatter();
+        List<InternalBlockEntity> list = new LinkedList<>();
+        InternalBlockEntity entity = new InternalBlockEntity();
+        // har bir qator bo'yicha ma'lumotlarni o'qish
+        for (Row row : sheet) {
+            c += 2;
+            // har bir qatori ustida yurish
+            for (Cell cell : row) {
+                b++;
+                // cell-ni bo'sh qolishi mumkin
+                if (cell.getCellType() == CellType.BLANK) {
+                    System.out.print(" ");
+                }else if (b % 2 == 1){
+                    entity.setBlockSeriya(dataFormatter.formatCellValue(cell));
+                } else if (b % 2 == 0) {
+                    entity.setNumber(Integer.valueOf(dataFormatter.formatCellValue(cell)));
+                }
+                if (b == c){
+                    list.add(entity);
+                    entity = new InternalBlockEntity();
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+    public InternalBlockEntity getInfoExel(String seriya){
+        List<InternalBlockEntity> list = getListExel();
+        for (InternalBlockEntity e : list){
+            if (e.getBlockSeriya().equals(seriya)){
+                return e;
+            }
+        }
+        return null;
     }
 }

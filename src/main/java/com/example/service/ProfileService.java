@@ -1,11 +1,9 @@
 package com.example.service;
 
 import com.example.MyTelegramBot;
-import com.example.dto.ProfileDTO;
-import com.example.entity.ProfileEntity;
+import com.example.dto.ProfileEntity;
 import com.example.repository.ProfileRepository;
 import com.example.util.ReplyKeyboardUtil;
-import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;

@@ -1,6 +1,6 @@
 package com.example.repository;
 
-import com.example.entity.ProfileEntity;
+import com.example.dto.ProfileEntity;
 import com.example.enums.ProfileStep;
 
 

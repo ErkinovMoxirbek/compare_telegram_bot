@@ -1,27 +1,16 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.dto.ProfileDTO;
-import com.example.entity.InternalBlockEntity;
-import com.example.entity.ProfileEntity;
+import com.example.dto.ProfileEntity;
 import com.example.enums.ProfileStep;
 import com.example.repository.ProfileRepository;
 import com.example.service.ComparisonService;
 import com.example.service.ProfileService;
-import com.example.util.InlineKeyBoardUtil;
 import com.example.util.ReplyKeyboardUtil;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.print.DocFlavor;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 public class MainController {
     private ProfileRepository profileRepository;

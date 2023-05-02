@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,11 +6,11 @@ import lombok.ToString;
 
 @Getter @Setter
 @ToString
-public class ExternalBlockEntity {
+public class InternalBlockDTO {
     private Integer id;
     private String blockSeriya;
     private Integer number;
-    public String writableString(){
+    public String writableString() {
         return id + "#" + blockSeriya + "#" + number;
     }
 }

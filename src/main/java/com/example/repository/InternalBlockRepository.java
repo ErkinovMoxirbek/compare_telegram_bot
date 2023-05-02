@@ -1,6 +1,6 @@
 package com.example.repository;
 
-import com.example.entity.InternalBlockEntity;
+import com.example.dto.InternalBlockDTO;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
@@ -9,19 +9,19 @@ import java.util.List;
 public class InternalBlockRepository {
  /*   ///  text file ///
 
- public InternalBlockEntity get(String seriya) {
-        Optional<InternalBlockEntity> optional = getAll().stream()
+ public InternalBlockDTO get(String seriya) {
+        Optional<InternalBlockDTO> optional = getAll().stream()
                 .filter(p -> p.getBlockSeriya().equals(seriya))
                 .findFirst();
 
         return optional.orElse(null);
     }
-    public List<InternalBlockEntity> getAll() {
+    public List<InternalBlockDTO> getAll() {
         try {
             Stream<String> lines = Files.lines(Path.of("InternalBlock.txt"));
             return lines.map(s -> {
                 String[] arr = s.split("#");
-                InternalBlockEntity internalBlock = new InternalBlockEntity();
+                InternalBlockDTO internalBlock = new InternalBlockDTO();
                 internalBlock.setId(Integer.valueOf(arr[0]));
                 internalBlock.setBlockSeriya(arr[1]);
                 internalBlock.setNumber(Integer.valueOf(arr[2]));
@@ -33,7 +33,7 @@ public class InternalBlockRepository {
         return new LinkedList<>();
     }
 
-    public void save(InternalBlockEntity entity) {
+    public void save(InternalBlockDTO entity) {
         try {
             PrintWriter printWriter = new PrintWriter(new FileWriter("InternalBlock.txt", true));
             printWriter.println(entity.writableString());
@@ -44,19 +44,19 @@ public class InternalBlockRepository {
             throw new RuntimeException(e);
         }
     }
-    public void update(InternalBlockEntity profileEntity) {
-        List<InternalBlockEntity> profileEntityList = getAll();
+    public void update(InternalBlockDTO profileEntity) {
+        List<InternalBlockDTO> profileEntityList = getAll();
         profileEntityList.removeIf(p -> p.getId().equals(profileEntity.getId()));
         profileEntityList.add(profileEntity);
         rewriteList(profileEntityList);
     }
     public void remove(Long id) {
-        List<InternalBlockEntity> profileEntityList = getAll();
+        List<InternalBlockDTO> profileEntityList = getAll();
         profileEntityList.removeIf(p -> p.getId().equals(id));
         rewriteList(profileEntityList);
     }
 
-    public void rewriteList(List<InternalBlockEntity> list) {
+    public void rewriteList(List<InternalBlockDTO> list) {
 
         try {
             PrintWriter printWriter = new PrintWriter(new FileWriter("InternalBlock.txt"));
@@ -69,8 +69,8 @@ public class InternalBlockRepository {
             throw new RuntimeException(e);
         }
     }
-    public void rewrite(Long id,InternalBlockEntity entity){
-        List<InternalBlockEntity> temp = getAll();
+    public void rewrite(Long id,InternalBlockDTO entity){
+        List<InternalBlockDTO> temp = getAll();
         for (int i = 0; i < temp.size(); i++) {
             if (temp.get(i).getId().equals(id)){
                 temp.set(i,entity);
@@ -78,7 +78,7 @@ public class InternalBlockRepository {
         }
         rewriteList(temp);
     }*/
-    public List<InternalBlockEntity> getListExel(){
+    public List<InternalBlockDTO> getListExel(){
         // faylni yuklash
         File file = new File("IchkiBlok.xlsx");
         FileInputStream inputStream = null;
@@ -95,8 +95,8 @@ public class InternalBlockRepository {
         int b = 0;
         int c = 0;
         DataFormatter dataFormatter = new DataFormatter();
-        List<InternalBlockEntity> list = new LinkedList<>();
-        InternalBlockEntity entity = new InternalBlockEntity();
+        List<InternalBlockDTO> list = new LinkedList<>();
+        InternalBlockDTO entity = new InternalBlockDTO();
         // har bir qator bo'yicha ma'lumotlarni o'qish
         for (Row row : sheet) {
             c += 2;
@@ -113,16 +113,16 @@ public class InternalBlockRepository {
                 }
                 if (b == c){
                     list.add(entity);
-                    entity = new InternalBlockEntity();
+                    entity = new InternalBlockDTO();
                     break;
                 }
             }
         }
         return list;
     }
-    public InternalBlockEntity getInfoExel(String seriya){
-        List<InternalBlockEntity> list = getListExel();
-        for (InternalBlockEntity e : list){
+    public InternalBlockDTO getInfoExel(String seriya){
+        List<InternalBlockDTO> list = getListExel();
+        for (InternalBlockDTO e : list){
             if (e.getBlockSeriya().equals(seriya)){
                 return e;
             }

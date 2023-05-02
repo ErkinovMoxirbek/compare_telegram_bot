@@ -1,30 +1,29 @@
 package com.example.repository;
 
-import com.example.entity.ExternalBlockEntity;
-import com.example.entity.ProfileEntity;
+import com.example.dto.ExternalBlockDTO;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ExternalBlockRepository {
-    public ExternalBlockEntity get(String seriya) {
-        Optional<ExternalBlockEntity> optional = getAll().stream()
+/*
+
+ /// with text file ///
+
+ public ExternalBlockDTO get(String seriya) {
+        Optional<ExternalBlockDTO> optional = getAll().stream()
                 .filter(p -> p.getBlockSeriya().equals(seriya))
                 .findFirst();
 
         return optional.orElse(null);
     }
-    public List<ExternalBlockEntity> getAll() {
+    public List<ExternalBlockDTO> getAll() {
         try {
             Stream<String> lines = Files.lines(Path.of("ExternalBlock.txt"));
             return lines.map(s -> {
                 String[] arr = s.split("#");
-                ExternalBlockEntity internalBlock = new ExternalBlockEntity();
+                ExternalBlockDTO internalBlock = new ExternalBlockDTO();
                 internalBlock.setId(Integer.valueOf(arr[0]));
                 internalBlock.setBlockSeriya(arr[1]);
                 internalBlock.setNumber(Integer.valueOf(arr[2]));
@@ -36,7 +35,7 @@ public class ExternalBlockRepository {
         return new LinkedList<>();
     }
 
-    public void save(ExternalBlockEntity entity) {
+    public void save(ExternalBlockDTO entity) {
         try {
             PrintWriter printWriter = new PrintWriter(new FileWriter("ExternalBlock.txt", true));
             printWriter.println(entity.writableString());
@@ -47,19 +46,19 @@ public class ExternalBlockRepository {
             throw new RuntimeException(e);
         }
     }
-    public void update(ExternalBlockEntity profileEntity) {
-        List<ExternalBlockEntity> profileEntityList = getAll();
+    public void update(ExternalBlockDTO profileEntity) {
+        List<ExternalBlockDTO> profileEntityList = getAll();
         profileEntityList.removeIf(p -> p.getId().equals(profileEntity.getId()));
         profileEntityList.add(profileEntity);
         rewriteList(profileEntityList);
     }
     public void remove(Integer id) {
-        List<ExternalBlockEntity> profileEntityList = getAll();
+        List<ExternalBlockDTO> profileEntityList = getAll();
         profileEntityList.removeIf(p -> p.getId().equals(id));
         rewriteList(profileEntityList);
     }
 
-    public void rewriteList(List<ExternalBlockEntity> list) {
+    public void rewriteList(List<ExternalBlockDTO> list) {
 
         try {
             PrintWriter printWriter = new PrintWriter(new FileWriter("ExternalBlock.txt"));
@@ -72,16 +71,16 @@ public class ExternalBlockRepository {
             throw new RuntimeException(e);
         }
     }
-    public void rewrite(Integer id,ExternalBlockEntity entity){
-        List<ExternalBlockEntity> temp = getAll();
+    public void rewrite(Integer id,ExternalBlockDTO entity){
+        List<ExternalBlockDTO> temp = getAll();
         for (int i = 0; i < temp.size(); i++) {
             if (temp.get(i).getId().equals(id)){
                 temp.set(i,entity);
             }
         }
         rewriteList(temp);
-    }
-    public List<ExternalBlockEntity> getListExel(){
+    }*/
+    public List<ExternalBlockDTO> getListExel(){
         // faylni yuklash
         File file = new File("TashqiBlok.xlsx");
         FileInputStream inputStream = null;
@@ -98,8 +97,8 @@ public class ExternalBlockRepository {
         int b = 0;
         int c = 0;
         DataFormatter dataFormatter = new DataFormatter();
-        List<ExternalBlockEntity> list = new LinkedList<>();
-        ExternalBlockEntity entity = new ExternalBlockEntity();
+        List<ExternalBlockDTO> list = new LinkedList<>();
+        ExternalBlockDTO entity = new ExternalBlockDTO();
         // har bir qator bo'yicha ma'lumotlarni o'qish
         for (Row row : sheet) {
             c += 2;
@@ -116,16 +115,16 @@ public class ExternalBlockRepository {
                 }
                 if (b == c){
                     list.add(entity);
-                    entity = new ExternalBlockEntity();
+                    entity = new ExternalBlockDTO();
                     break;
                 }
             }
         }
         return list;
     }
-    public ExternalBlockEntity getInfoExel(String seriya){
-        List<ExternalBlockEntity> list = getListExel();
-        for (ExternalBlockEntity e : list){
+    public ExternalBlockDTO getInfoExel(String seriya){
+        List<ExternalBlockDTO> list = getListExel();
+        for (ExternalBlockDTO e : list){
             if (e.getBlockSeriya().equals(seriya)){
                 return e;
             }

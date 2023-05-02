@@ -3,7 +3,7 @@ package com.example.service;
 import com.example.MyTelegramBot;
 import com.example.dto.ExternalBlockDTO;
 import com.example.dto.InternalBlockDTO;
-import com.example.dto.ProfileEntity;
+import com.example.dto.ProfileDTO;
 import com.example.enums.ProfileStep;
 import com.example.repository.ExternalBlockRepository;
 import com.example.repository.InternalBlockRepository;
@@ -30,11 +30,11 @@ public class ComparisonService {
     public void internalBlockEnter (Message message){
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
-        ProfileEntity entity = profileRepository.getProfile(message.getChatId());
+        ProfileDTO entity = profileRepository.getProfile(message.getChatId());
         if (entity.getStep().equals(ProfileStep.Done)) {
             sendMessage.setText("Ichki blok seriya raqamining ilk 8 ta belgisini kiriting:");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            ProfileEntity profileEntity = profileRepository.getProfile(message.getChatId());
+            ProfileDTO profileEntity = profileRepository.getProfile(message.getChatId());
             profileEntity.setStep(ProfileStep.Save_Internal_Block);
             profileRepository.update(profileEntity);
             myTelegramBot.sendMsg(sendMessage);
@@ -42,7 +42,7 @@ public class ComparisonService {
     }
 
     public void externalBlockEnter(Message message) {
-        ProfileEntity entity = profileRepository.getProfile(message.getChatId());
+        ProfileDTO entity = profileRepository.getProfile(message.getChatId());
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
         if (entity.getStep().equals(ProfileStep.Save_Internal_Block)){
@@ -64,7 +64,7 @@ public class ComparisonService {
         if (entity.getStep().equals(ProfileStep.Enter_External_Block)){
             sendMessage.setText("Tashqi blok seriya raqamining ilk 8 ta belgisini kiriting:");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            ProfileEntity profileEntity = profileRepository.getProfile(message.getChatId());
+            ProfileDTO profileEntity = profileRepository.getProfile(message.getChatId());
             profileEntity.setStep(ProfileStep.Save_External_Block);
             profileRepository.update(profileEntity);
             myTelegramBot.sendMsg(sendMessage);
@@ -103,7 +103,7 @@ public class ComparisonService {
             myTelegramBot.sendMsg(sendMessage);
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
         }
-        ProfileEntity entity = profileRepository.getProfile(message.getChatId());
+        ProfileDTO entity = profileRepository.getProfile(message.getChatId());
         entity.setStep(ProfileStep.Done);
         profileRepository.update(entity);
     }

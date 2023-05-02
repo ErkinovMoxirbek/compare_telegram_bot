@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.MyTelegramBot;
-import com.example.dto.ProfileEntity;
+import com.example.dto.ProfileDTO;
 import com.example.repository.ProfileRepository;
 import com.example.util.ReplyKeyboardUtil;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,7 +19,7 @@ public class ProfileService {
         this.myTelegramBot = myTelegramBot;
     }
     public void create(ProfileDTO dto) {
-        ProfileEntity entity = new ProfileEntity();
+        ProfileDTO entity = new ProfileDTO();
         entity.setId(dto.getId());
         entity.setStep(dto.getStep());
         profileRepository.save(entity);

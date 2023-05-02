@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.MyTelegramBot;
-import com.example.dto.ProfileEntity;
+import com.example.dto.ProfileDTO;
 import com.example.enums.ProfileStep;
 import com.example.repository.ProfileRepository;
 import com.example.service.ComparisonService;
@@ -26,7 +26,7 @@ public class MainController {
     }
 
     public void handle(String text, Message message) throws MalformedURLException {
-        ProfileEntity entity = profileRepository.getProfile(message.getChatId());
+        ProfileDTO entity = profileRepository.getProfile(message.getChatId());
         if (text.equals("/start") || text.equals("\uD83D\uDDD1 Bekor qilish")) {
             if (entity == null){
                 ProfileDTO dto = new ProfileDTO();

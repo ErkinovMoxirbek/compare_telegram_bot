@@ -13,16 +13,15 @@ import java.io.IOException;
 public class ComparisonApplication {
 
 	public static void main(String[] args) throws TelegramApiException {
-		SpringApplication.run(ComparisonApplication.class, args);
 		try {
 
 			File file = new File("Profile.txt");
 			if (!file.exists()) {
 				file.createNewFile();
-			}File file1 = new File("InternalBlock.txt");
+			}File file1 = new File("IchkiBloklar.xlsx");
 			if (!file1.exists()) {
 				file1.createNewFile();
-			}File file2 = new File("ExternalBlock.txt");
+			}File file2 = new File("TashqiBloklar.xlsx");
 			if (!file2.exists()) {
 				file2.createNewFile();
 			}
@@ -34,5 +33,6 @@ public class ComparisonApplication {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		SpringApplication.run(ComparisonApplication.class, args);
 	}
 }

@@ -9,7 +9,7 @@ import lombok.ToString;
 public class ExternalBlockDTO {
     private Integer id;
     private String blockSeriya;
-    private Integer number;
+    private String number;
     public String writableString(){
         return id + "#" + blockSeriya + "#" + number;
     }

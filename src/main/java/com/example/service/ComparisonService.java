@@ -73,7 +73,7 @@ public class ComparisonService {
             if (message.getText().length() == 8){
                 externalBlock = externalBlockRepository.getInfoExel(message.getText().toLowerCase());
                 if (externalBlock == null){
-                    sendMessage.setText("⛔️ Ichki blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
+                    sendMessage.setText("⛔️ Tashqi blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
                     sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
                     myTelegramBot.sendMsg(sendMessage);
                     entity.setStep(ProfileStep.Enter_External_Block);
@@ -98,10 +98,6 @@ public class ComparisonService {
             sendMessage.setText("✅ Bu ichki va tashqi bloklar bir biriga mos keladi.");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
             myTelegramBot.sendMsg(sendMessage);
-        }if (!internalBlock.getNumber().equals(externalBlock.getNumber())){
-            sendMessage.setText("⛔️Bu ichki va tashqi bloklar bir biriga mos kelmaydi.");
-            myTelegramBot.sendMsg(sendMessage);
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
         }
         ProfileDTO entity = profileRepository.getProfile(message.getChatId());
         entity.setStep(ProfileStep.Done);

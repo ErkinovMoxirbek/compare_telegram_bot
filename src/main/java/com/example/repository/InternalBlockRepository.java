@@ -80,7 +80,7 @@ public class InternalBlockRepository {
     }*/
     public List<InternalBlockDTO> getListExel(){
         // faylni yuklash
-        File file = new File("IchkiBlok.xlsx");
+        File file = new File("IchkiBloklar.xlsx");
         FileInputStream inputStream = null;
         Workbook workbook = null;
         try {
@@ -109,7 +109,7 @@ public class InternalBlockRepository {
                 }else if (b % 2 == 1){
                     entity.setBlockSeriya(dataFormatter.formatCellValue(cell));
                 } else if (b % 2 == 0) {
-                    entity.setNumber(Integer.valueOf(dataFormatter.formatCellValue(cell)));
+                    entity.setNumber(dataFormatter.formatCellValue(cell));
                 }
                 if (b == c){
                     list.add(entity);

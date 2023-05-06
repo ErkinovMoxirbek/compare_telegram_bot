@@ -18,10 +18,10 @@ public class ComparisonApplication {
 			File file = new File("Profile.txt");
 			if (!file.exists()) {
 				file.createNewFile();
-			}File file1 = new File("IchkiBloklar.xlsx");
+			}File file1 = new File("AdminProfile.txt");
 			if (!file1.exists()) {
 				file1.createNewFile();
-			}File file2 = new File("TashqiBloklar.xlsx");
+			}File file2 = new File("SuperAdminProfile.txt");
 			if (!file2.exists()) {
 				file2.createNewFile();
 			}

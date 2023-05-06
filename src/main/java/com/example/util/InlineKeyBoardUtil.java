@@ -13,22 +13,25 @@ public class InlineKeyBoardUtil {
         return button;
     }
 
-    public static InlineKeyboardMarkup cancellation(String id) {
+    public static InlineKeyboardMarkup getCheckOrder(Long id) {
 
         List<InlineKeyboardButton> row = new LinkedList<>();
-        InlineKeyboardButton button1 = InlineKeyBoardUtil.button("Bekor qilish \uD83D\uDDD1", "cancellation/"+id);
+        InlineKeyboardButton button1 = InlineKeyBoardUtil.button("✅ Ha, qabul qilaman", "Check/" + id );
+        List<InlineKeyboardButton> row2 = new LinkedList<>();
+        InlineKeyboardButton button2 = InlineKeyBoardUtil.button("❌ Yo'q, qabul qilmayman", "NotCheck/" + id );
 
         row.add(button1);
+        row2.add(button2);
 
 
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new LinkedList<>();
         rowList.add(row);
+        rowList.add(row2);
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
-
 
 }

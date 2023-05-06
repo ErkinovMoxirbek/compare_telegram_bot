@@ -59,6 +59,9 @@ public class ComparisonService {
                 }
                 entity.setStep(ProfileStep.Enter_External_Block);
                 profileRepository.update(entity);
+            }else {
+                sendMessage.setText("\uD83D\uDD04 8 ta belgi kiritilmadi!\n Qayta urining!");
+                myTelegramBot.sendMsg(sendMessage);
             }
         }
         if (entity.getStep().equals(ProfileStep.Enter_External_Block)){
@@ -82,6 +85,9 @@ public class ComparisonService {
                     return;
                 }
                 comparison(internalBlock,externalBlock,message);
+            }else {
+                sendMessage.setText("\uD83D\uDD04 8 ta belgi kiritilmadi!\n Qayta urining!");
+                myTelegramBot.sendMsg(sendMessage);
             }
         }
     }

@@ -151,12 +151,6 @@ public class ProfileRepository {
                 .findFirst();
 
         return optional.orElse(null);
-    }public SuperAdminProfileDTO getSuperAdminProfileByRole(Role role) {
-        Optional<SuperAdminProfileDTO> optional = getSuperAdminAll().stream()
-                .filter(p -> p.getRole().equals(role))
-                .findFirst();
-
-        return optional.orElse(null);
     }
     public List<SuperAdminProfileDTO> getSuperAdminAll() {
         try {
@@ -168,7 +162,7 @@ public class ProfileRepository {
                 dto.setStep(ProfileStep.valueOf(arr[1]));
                 dto.setLogin(arr[2]);
                 dto.setPassword(arr[3]);
-                dto.setRole(Role.valueOf(arr[4]));
+                dto.setVisible(Boolean.valueOf(arr[4]));
                 return dto;
             }).collect(Collectors.toList());
         } catch (IOException e) {

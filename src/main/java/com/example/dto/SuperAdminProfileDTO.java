@@ -11,8 +11,8 @@ public class SuperAdminProfileDTO {
     private ProfileStep step;
     private String login;
     private String password;
-    private Role role = Role.SUPER_ADMIN;
+    private Boolean visible;
     public String writableString(){
-        return id + "#" + step + "#" + login + "#" + password + "#" + role;
+        return id + "#" + step + "#" + login + "#" + password + "#" + visible;
     }
 }

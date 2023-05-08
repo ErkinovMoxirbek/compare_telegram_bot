@@ -1,5 +1,6 @@
 package com.example.util;
 
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -13,12 +14,12 @@ public class InlineKeyBoardUtil {
         return button;
     }
 
-    public static InlineKeyboardMarkup getCheckOrder(Long id) {
+    public static InlineKeyboardMarkup getCheck(Long id,Integer messageId ) {
 
         List<InlineKeyboardButton> row = new LinkedList<>();
-        InlineKeyboardButton button1 = InlineKeyBoardUtil.button("✅ Ha, qabul qilaman", "Check/" + id );
+        InlineKeyboardButton button1 = InlineKeyBoardUtil.button("✅ Ha, qabul qilaman", "Check/" + id + "/" + messageId);
         List<InlineKeyboardButton> row2 = new LinkedList<>();
-        InlineKeyboardButton button2 = InlineKeyBoardUtil.button("❌ Yo'q, qabul qilmayman", "NotCheck/" + id );
+        InlineKeyboardButton button2 = InlineKeyBoardUtil.button("❌ Yo'q, qabul qilmayman", "NotCheck/" + id + "/" + messageId );
 
         row.add(button1);
         row2.add(button2);

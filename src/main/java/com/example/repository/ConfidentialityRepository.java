@@ -47,12 +47,18 @@ public class ConfidentialityRepository {
                 dto.setId(arr[0]);
                 dto.setLogin(arr[1]);
                 dto.setPassword(arr[2]);
-                dto.setSuperAdminCount(Integer.parseInt(arr[3]));
                 return dto;
             }).collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return new LinkedList<>();
+    }
+
+    public void update(ConfidentialityDTO dto) {
+        List<ConfidentialityDTO> dtoList = getConfidentialityAll();
+        dtoList.removeIf(p -> p.getId().equals(dto.getId()));
+        dtoList.add(dto);
+        rewriteConfidentialityList(dtoList);
     }
 }

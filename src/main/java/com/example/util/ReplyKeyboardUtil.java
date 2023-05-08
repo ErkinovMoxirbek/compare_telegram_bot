@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,13 +33,17 @@ public class ReplyKeyboardUtil {
         return replyKeyboardMarkup;
     }
     public static ReplyKeyboardMarkup menuAdmin() {
-        KeyboardButton order = button("\uD83D\uDC64 Adminlarim");
-        KeyboardButton Suggestions = button("yana nimadir");
+        KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
+        KeyboardButton order2 = button("Tez kunda");
+        KeyboardButton order3 = button("Tez kunda");
+        KeyboardRow row = new KeyboardRow();
+        row.add(order);
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(order);
+        row1.add(order2);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Suggestions);
+        row2.add(order3);
         List<KeyboardRow> rowList = new LinkedList<>();
+        rowList.add(row);
         rowList.add(row1);
         rowList.add(row2);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

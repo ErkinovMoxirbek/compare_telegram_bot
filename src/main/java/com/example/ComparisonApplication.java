@@ -24,7 +24,7 @@ public class ComparisonApplication {
 			}File file2 = new File("SuperAdminProfile.txt");
 			if (!file2.exists()) {
 				file2.createNewFile();
-			}File file3 = new File("ConfidentialityDTO.txt");
+			}File file3 = new File("Confidentiality.txt");
 			if (!file2.exists()) {
 				file2.createNewFile();
 			}

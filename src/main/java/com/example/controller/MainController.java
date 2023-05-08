@@ -68,6 +68,7 @@ public class MainController {
                     comparisonService.externalBlockEnter(message);
                 }
             }
+
             if ( profileRepository.getAdminProfile(message.getChatId()) != null){
                 if ( profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_name) ){
                     adminService.enterName(message);

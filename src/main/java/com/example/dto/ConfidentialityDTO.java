@@ -8,8 +8,7 @@ public class ConfidentialityDTO {
     private String id;
     private String login;
     private String password;
-    private int superAdminCount;
     public String writableString(){
-        return id + "#" + login + "#" + password + "#" + superAdminCount;
+        return id + "#" + login + "#" + password ;
     }
 }

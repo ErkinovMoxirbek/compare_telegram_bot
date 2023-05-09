@@ -8,14 +8,12 @@ import com.example.repository.ConfidentialityRepository;
 import com.example.repository.ExternalBlockRepository;
 import com.example.repository.InternalBlockRepository;
 import com.example.repository.ProfileRepository;
-import com.example.service.AdminService;
-import com.example.service.CategoryService;
-import com.example.service.ComparisonService;
-import com.example.service.ProfileService;
+import com.example.service.*;
 import org.checkerframework.checker.units.qual.C;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -32,10 +30,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private ConfidentialityRepository confidentialityRepository = new ConfidentialityRepository();
     private ProfileService profileService = new ProfileService(profileRepository,this);
     private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository);
-    private CallBackController callBackController = new CallBackController(adminService,this);
+    private SuperAdminService superAdminService = new SuperAdminService(this,profileRepository,confidentialityRepository);
+    private CallBackController callBackController = new CallBackController(superAdminService,adminService,this);
     private CategoryService categoryService = new CategoryService(profileService,profileRepository,this);
     private ComparisonService comparisonService = new ComparisonService(profileRepository,internalBlockRepository,externalBlockRepository,this);
-    private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService);
+    private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService,superAdminService);
     private MainController mainController  = new MainController(profileRepository,profileService,comparisonService,this,adminService,categoryService);
 
 
@@ -51,19 +50,21 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(update.getMessage().getChatId());
-            if (dto != null && dto.getVisible()){
-                if (update.getMessage().getChatId().equals(dto.getId())){
+            if (update.hasMessage()){
+                SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(update.getMessage().getChatId());
+                if (dto != null && dto.getVisible()){
+                    if (update.getMessage().getChatId().equals(dto.getId())){
+                        System.out.println(update);
+                        Message message = update.getMessage();
+                        superAdminControler.handle(message);
+                    }
+                }else {
                     System.out.println(update);
                     Message message = update.getMessage();
-                    superAdminControler.handle(message);
+                    mainController.handle(message.getText(), message);
                 }
             }
-            else if (update.hasMessage()) {
-                System.out.println(update);
-                Message message = update.getMessage();
-                mainController.handle(message.getText(), message);
-            } else if (update.hasCallbackQuery()) {
+            else if (update.hasCallbackQuery()) {
                 System.out.println(update);
                 CallbackQuery callbackQuery = update.getCallbackQuery();
                 String data = callbackQuery.getData();
@@ -89,6 +90,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
     public void sendMsg(EditMessageText method) {
+        try {
+            execute(method);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }public void deleteMsg(DeleteMessage method) {
         try {
             execute(method);
         } catch (TelegramApiException e) {

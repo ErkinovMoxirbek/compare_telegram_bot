@@ -34,18 +34,16 @@ public class ReplyKeyboardUtil {
     }
     public static ReplyKeyboardMarkup menuAdmin() {
         KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
-        KeyboardButton order2 = button("Tez kunda");
-        KeyboardButton order3 = button("Tez kunda");
+        KeyboardButton order2 = button("\uD83D\uDC64 Adminlarim");
+        KeyboardButton order3 = button("⚙️ Sozlamalar");
         KeyboardRow row = new KeyboardRow();
         row.add(order);
         KeyboardRow row1 = new KeyboardRow();
         row1.add(order2);
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(order3);
+        row1.add(order3);
         List<KeyboardRow> rowList = new LinkedList<>();
         rowList.add(row);
         rowList.add(row1);
-        rowList.add(row2);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(rowList);
         replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
@@ -98,6 +96,31 @@ public class ReplyKeyboardUtil {
         replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
         replyKeyboardMarkup.setOneTimeKeyboard(true);
 
+        return replyKeyboardMarkup;
+    }
+    public static ReplyKeyboardMarkup settingsMenu() {
+        KeyboardButton order = button("\uD83D\uDDC2 Ma'lumotlar");
+        KeyboardButton order2 = button("✏️ Loginni o'zgartirish");
+        KeyboardButton order3 = button("✏️ Parolni o'zgartirish");
+        KeyboardButton order4 = button("\uD83D\uDDD1 Bekor qilish");
+        KeyboardRow row = new KeyboardRow();
+        row.add(order);
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(order2);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(order3);
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(order4);
+        List<KeyboardRow> rowList = new LinkedList<>();
+        rowList.add(row);
+        rowList.add(row1);
+        rowList.add(row2);
+        rowList.add(row4);
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(rowList);
+        replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
+        replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
     }
 }

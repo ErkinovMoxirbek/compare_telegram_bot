@@ -34,5 +34,15 @@ public class InlineKeyBoardUtil {
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
+    public static InlineKeyboardMarkup deleteAdmin(Long id,Integer messageId ) {
+        List<InlineKeyboardButton> row = new LinkedList<>();
+        InlineKeyboardButton button1 = InlineKeyBoardUtil.button("\uD83D\uDDD1 Olib tashlash", "delete/" + id + "/" + messageId);
+        row.add(button1);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new LinkedList<>();
+        rowList.add(row);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
 
 }

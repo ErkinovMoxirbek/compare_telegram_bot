@@ -1,9 +1,6 @@
 package com.example.repository;
 
 import com.example.dto.ConfidentialityDTO;
-import com.example.dto.SuperAdminProfileDTO;
-import com.example.enums.ProfileStep;
-import com.example.enums.Role;
 
 import java.io.FileWriter;
 import java.io.IOException;

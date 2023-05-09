@@ -5,7 +5,6 @@ import com.example.dto.AdminProfileDTO;
 import com.example.dto.ProfileDTO;
 import com.example.dto.SuperAdminProfileDTO;
 import com.example.enums.ProfileStep;
-import com.example.enums.Role;
 
 
 import java.io.FileWriter;
@@ -160,9 +159,7 @@ public class ProfileRepository {
                 SuperAdminProfileDTO dto = new SuperAdminProfileDTO();
                 dto.setId(Long.valueOf(arr[0]));
                 dto.setStep(ProfileStep.valueOf(arr[1]));
-                dto.setLogin(arr[2]);
-                dto.setPassword(arr[3]);
-                dto.setVisible(Boolean.valueOf(arr[4]));
+                dto.setVisible(Boolean.valueOf(arr[2]));
                 return dto;
             }).collect(Collectors.toList());
         } catch (IOException e) {

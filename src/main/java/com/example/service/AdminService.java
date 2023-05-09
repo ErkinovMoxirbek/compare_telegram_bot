@@ -2,11 +2,8 @@ package com.example.service;
 
 import com.example.MyTelegramBot;
 import com.example.dto.AdminProfileDTO;
-import com.example.dto.ConfidentialityDTO;
-import com.example.dto.ProfileDTO;
 import com.example.dto.SuperAdminProfileDTO;
 import com.example.enums.ProfileStep;
-import com.example.enums.Role;
 import com.example.repository.ConfidentialityRepository;
 import com.example.repository.ProfileRepository;
 import com.example.util.InlineKeyBoardUtil;
@@ -87,12 +84,20 @@ public class AdminService {
         sendMessage.setChatId(adminId);
         sendMessage.setText("\uD83E\uDD73 Super admin sizni admin sifatida qabul qildi!");
         myTelegramBot.sendMsg(sendMessage);
+        sendMessage.setChatId(message.getChatId());
+        sendMessage.setText("Bajarildi ✅");
+        sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
+        myTelegramBot.sendMsg(sendMessage);
     }
     public void notCheckAdmin(Long adminId ,Message message){
         profileRepository.removeAdmin(adminId);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(adminId);
         sendMessage.setText("\uD83D\uDE41 Super admin sizni admin sifatida qabul qilmadi!");
+        myTelegramBot.sendMsg(sendMessage);
+        sendMessage.setChatId(message.getChatId());
+        sendMessage.setText("Bajarildi ✅");
+        sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
         myTelegramBot.sendMsg(sendMessage);
     }
     public void login(Message message){
@@ -120,7 +125,6 @@ public class AdminService {
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             myTelegramBot.sendMsg(sendMessage);
-            dto.setLogin(message.getText());
             dto.setStep(ProfileStep.Enter_password);
             profileRepository.updateSuperAdmin(dto);
         }
@@ -139,7 +143,6 @@ public class AdminService {
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
             myTelegramBot.sendMsg(sendMessage);
-            dto.setLogin(message.getText());
             dto.setStep(ProfileStep.Done);
             profileRepository.updateSuperAdmin(dto);
         }

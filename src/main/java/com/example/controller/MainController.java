@@ -34,12 +34,6 @@ public class MainController {
                     AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(message.getChatId());
                     adminProfileDTO.setStep(ProfileStep.Done);
                     profileRepository.updateAdmin(adminProfileDTO);
-                } if (profileRepository.getSuperAdminProfile(message.getChatId()) != null &&
-                        !profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)){
-                    SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
-                    dto.setId(1L);
-                    dto.setStep(ProfileStep.Done);
-                    profileRepository.updateSuperAdmin(dto);
                 }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setText("Bo'limlarni birni tanlang!");
@@ -68,7 +62,6 @@ public class MainController {
                     comparisonService.externalBlockEnter(message);
                 }
             }
-
             if ( profileRepository.getAdminProfile(message.getChatId()) != null){
                 if ( profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_name) ){
                     adminService.enterName(message);
@@ -103,13 +96,11 @@ public class MainController {
             if (profileRepository.getAdminProfile(message.getChatId()) == null ||
                     profileRepository.getAdminProfile(message.getChatId()).getName().equals("null") ||
                     profileRepository.getAdminProfile(message.getChatId()).getSurname().equals("null")  ||
-                    profileRepository.getAdminProfile(message.getChatId()).getPhone().equals("null") ){
+                    profileRepository.getAdminProfile(message.getChatId()).getPhone().equals("null") ) {
                 ProfileDTO dto = profileRepository.getProfile(message.getChatId());
                 dto.setStep(ProfileStep.Done);
                 profileRepository.update(dto);
                 adminService.create(message);
-            }else if (profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getVisible()){
-
             }else{
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setText("So'rovnoma super adminga yuborilgan iltimos kuting!");

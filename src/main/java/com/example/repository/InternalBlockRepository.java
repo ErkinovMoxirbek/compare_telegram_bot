@@ -123,7 +123,7 @@ public class InternalBlockRepository {
     public InternalBlockDTO getInfoExel(String seriya){
         List<InternalBlockDTO> list = getListExel();
         for (InternalBlockDTO e : list){
-            if (e.getBlockSeriya().equals(seriya)){
+            if (e.getBlockSeriya().toLowerCase().equals(seriya)){
                 return e;
             }
         }

@@ -6,5 +6,5 @@ public enum ProfileStep {
     //Admin
     Enter_name,Enter_surname,Enter_phone,
     //Super Admin
-    Enter_login,Enter_password,Edit_Login,Edit_Password
+    Enter_login,Enter_password,Edit_Login,Edit_Password,Save_file, Download_file
 }

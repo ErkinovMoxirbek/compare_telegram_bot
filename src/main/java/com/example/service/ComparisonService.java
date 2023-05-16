@@ -13,10 +13,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class ComparisonService {
-    private ProfileRepository profileRepository;
-    private InternalBlockRepository internalBlockRepository;
-    private ExternalBlockRepository externalBlockRepository;
-    private MyTelegramBot myTelegramBot;
+    private final ProfileRepository profileRepository;
+    private final InternalBlockRepository internalBlockRepository;
+    private final ExternalBlockRepository externalBlockRepository;
+    private final MyTelegramBot myTelegramBot;
     private InternalBlockDTO internalBlock;
     private ExternalBlockDTO externalBlock;
 
@@ -47,7 +47,10 @@ public class ComparisonService {
         sendMessage.setChatId(message.getChatId());
         if (entity.getStep().equals(ProfileStep.Save_Internal_Block)){
             if (message.getText().length() == 8){
-                internalBlock = internalBlockRepository.getInfoExel(message.getText().toLowerCase());
+                String text = message.getText().substring(3);
+                System.out.println(text);
+                internalBlock = internalBlockRepository.getInfoExel(text.toLowerCase());
+
                 if (internalBlock == null){
                     sendMessage.setText("⛔️ Ichki blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
                     sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
@@ -74,7 +77,8 @@ public class ComparisonService {
 
         }else if (entity.getStep().equals(ProfileStep.Save_External_Block)){
             if (message.getText().length() == 8){
-                externalBlock = externalBlockRepository.getInfoExel(message.getText().toLowerCase());
+                String text = message.getText().substring(3);
+                externalBlock = externalBlockRepository.getInfoExel(text.toLowerCase());
                 if (externalBlock == null){
                     sendMessage.setText("⛔️ Tashqi blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
                     sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
@@ -95,13 +99,26 @@ public class ComparisonService {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
         if (internalBlock!=null){
-            System.out.println(internalBlock.toString());
+            System.out.println(internalBlock);
         }
         if (externalBlock!= null){
-            System.out.println(externalBlock.toString());
+            System.out.println(externalBlock);
         }
+        System.out.println(internalBlock.getNumber());
+        System.out.println(externalBlock.getNumber());
         if (internalBlock.getNumber().equals(externalBlock.getNumber())){
             sendMessage.setText("✅ Bu ichki va tashqi bloklar bir biriga mos keladi.");
+            if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
+                if (profileRepository.getSuperAdminProfile(message.getChatId()).getVisible()){
+                    sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
+                }
+            }
+            else{
+                sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+            }
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            sendMessage.setText("⛔️Bu ichki va tashqi bloklar bir biriga mos kelmaydi.");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
             myTelegramBot.sendMsg(sendMessage);
         }

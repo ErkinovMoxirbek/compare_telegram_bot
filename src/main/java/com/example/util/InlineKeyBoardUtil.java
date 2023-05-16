@@ -1,5 +1,7 @@
 package com.example.util;
 
+import com.example.dto.FileDTO;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -41,6 +43,32 @@ public class InlineKeyBoardUtil {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new LinkedList<>();
         rowList.add(row);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+    public static InlineKeyboardMarkup getFile(List<FileDTO> fileList,String path) {
+        List<List<InlineKeyboardButton>> rowList = new LinkedList<>();
+        List<InlineKeyboardButton> row ;
+        for(FileDTO dto : fileList){
+            row = new LinkedList<>();
+            dto.setPath(dto.getPath().replace("\\","/"));
+            InlineKeyboardButton button1 = InlineKeyBoardUtil.button(dto.getName() ,"File:" + dto.getPath());
+            row.add(button1);
+            rowList.add(row);
+        }
+        String [] arr = path.split("/");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        System.out.println(path);
+        if (arr.length >= 2){
+            System.out.println("button back added");
+            row = new LinkedList<>();
+            int index = path.lastIndexOf('/');
+            String newPath = path.substring(0,index);
+
+            InlineKeyboardButton button = InlineKeyBoardUtil.button("\uD83D\uDD19 Orqaga","Back:" + newPath);
+            row.add(button);
+            rowList.add(row);
+        }
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }

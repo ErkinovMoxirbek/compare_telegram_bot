@@ -9,15 +9,14 @@ import com.example.repository.ExternalBlockRepository;
 import com.example.repository.InternalBlockRepository;
 import com.example.repository.ProfileRepository;
 import com.example.service.*;
-import org.checkerframework.checker.units.qual.C;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.net.MalformedURLException;
@@ -28,13 +27,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private InternalBlockRepository internalBlockRepository = new InternalBlockRepository();
     private ExternalBlockRepository externalBlockRepository = new ExternalBlockRepository();
     private ConfidentialityRepository confidentialityRepository = new ConfidentialityRepository();
+    private FileHandlerService fileHandlerService = new FileHandlerService(this,profileRepository);
     private ProfileService profileService = new ProfileService(profileRepository,this);
-    private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository);
-    private SuperAdminService superAdminService = new SuperAdminService(this,profileRepository,confidentialityRepository);
-    private CallBackController callBackController = new CallBackController(superAdminService,adminService,this);
-    private CategoryService categoryService = new CategoryService(profileService,profileRepository,this);
+    private SuperAdminService superAdminService = new SuperAdminService(this,profileRepository,confidentialityRepository,fileHandlerService);
     private ComparisonService comparisonService = new ComparisonService(profileRepository,internalBlockRepository,externalBlockRepository,this);
-    private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService,superAdminService);
+    private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService,superAdminService,fileHandlerService);
+    private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository,superAdminControler);
+    private CallBackController callBackController = new CallBackController(superAdminService,adminService,profileRepository,fileHandlerService);
+    private CategoryService categoryService = new CategoryService(profileService,profileRepository,this);
     private MainController mainController  = new MainController(profileRepository,profileService,comparisonService,this,adminService,categoryService);
 
 
@@ -45,7 +45,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "1793820753:AAEepXiMoLpjHAYenUNtVba_exQxGbplZ_o";
+        return "1793820753:AAGTT-mFXQR_3XhL8857g5NMK0BsCiznIqQ";
     }
     @Override
     public void onUpdateReceived(Update update) {
@@ -68,8 +68,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 System.out.println(update);
                 CallbackQuery callbackQuery = update.getCallbackQuery();
                 String data = callbackQuery.getData();
-                callBackController.handle(data,callbackQuery.getMessage());
-            } else {
+                callBackController.handle(data, callbackQuery.getMessage());
+            }else {
                 System.out.println("my telegram hatto");
             }
         } catch (RuntimeException e) {
@@ -80,10 +80,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
+    public Message sendDoc(SendDocument method) {
+        try {
+            return execute(method);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public Message sendMsg(SendMessage method) {
         try {
-            Message execute = execute(method);
-            return execute;
+            return execute(method);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
@@ -111,4 +117,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    public File getFile(GetFile getFileRequest) throws TelegramApiException {
+        return execute(getFileRequest);
+
+    }
 }

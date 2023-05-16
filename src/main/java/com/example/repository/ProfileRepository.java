@@ -35,6 +35,7 @@ public class ProfileRepository {
                 profileEntity.setId(Long.valueOf(arr[0]));
                 profileEntity.setStep(ProfileStep.valueOf(arr[1]));
                 profileEntity.setCreatedDate(LocalDateTime.parse(arr[2]));
+                profileEntity.setNowPath(arr[3]);
                 return profileEntity;
             }).collect(Collectors.toList());
         } catch (IOException e) {

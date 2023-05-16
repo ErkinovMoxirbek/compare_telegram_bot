@@ -53,7 +53,7 @@ public class ExternalBlockRepository {
     public ExternalBlockDTO getInfoExel(String seriya){
         List<ExternalBlockDTO> list = getListExel();
         for (ExternalBlockDTO e : list){
-            if (e.getBlockSeriya().equals(seriya)){
+            if (e.getBlockSeriya().toLowerCase().equals(seriya)){
                 return e;
             }
         }

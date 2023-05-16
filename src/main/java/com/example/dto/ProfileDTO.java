@@ -10,8 +10,8 @@ public class ProfileDTO {
     private Long id;
     private ProfileStep step;
     private LocalDateTime createdDate = LocalDateTime.now();
-
+    private String nowPath ;
     public String writableString() {
-        return id + "#" + step + "#" + createdDate;
+        return id + "#" + step + "#" + createdDate + "#" + nowPath;
     }
 }

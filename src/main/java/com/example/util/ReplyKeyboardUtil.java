@@ -5,7 +5,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
-import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,18 +31,62 @@ public class ReplyKeyboardUtil {
         replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
     }
+    public static ReplyKeyboardMarkup menuBaseKeyboard() {
+        KeyboardButton order = button("\uD83D\uDCE4 Yuklab olish");
+        KeyboardButton Suggestions = button("\uD83D\uDCE5 Yuklab qo'yish");
+        KeyboardButton exit = button("\uD83D\uDDD1 Bekor qilish");
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(order);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(Suggestions);
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(exit);
+        List<KeyboardRow> rowList = new LinkedList<>();
+        rowList.add(row1);
+        rowList.add(row2);
+        rowList.add(row3);
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(rowList);
+        replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
+        replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        return replyKeyboardMarkup;
+    }
     public static ReplyKeyboardMarkup menuAdmin() {
+        KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
+        KeyboardButton order4 = button("\uD83D\uDCC1 Base");
+        KeyboardButton Suggestions = button("\uD83D\uDCD1 Yo'riqnoma");
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(order);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(order4);
+        row2.add(Suggestions);
+        List<KeyboardRow> rowList = new LinkedList<>();
+        rowList.add(row1);
+        rowList.add(row2);
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setKeyboard(rowList);
+        replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
+        replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        return replyKeyboardMarkup;
+    }
+    public static ReplyKeyboardMarkup menuSuperAdmin() {
         KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
         KeyboardButton order2 = button("\uD83D\uDC64 Adminlarim");
         KeyboardButton order3 = button("⚙️ Sozlamalar");
+        KeyboardButton order4 = button("\uD83D\uDCC1 Base");
         KeyboardRow row = new KeyboardRow();
         row.add(order);
         KeyboardRow row1 = new KeyboardRow();
         row1.add(order2);
         row1.add(order3);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(order4);
         List<KeyboardRow> rowList = new LinkedList<>();
         rowList.add(row);
         rowList.add(row1);
+        rowList.add(row2);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(rowList);
         replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi

@@ -48,6 +48,9 @@ public class MainController {
                 profileService.manual(message);
             }
             else if (text.equals("✅ Bloklarning bir biriga mosligini tekshirish")){
+                if (profileRepository.getProfile(message.getChatId()) == null) {
+                    categoryService.createProfile(message);
+                }
                 ProfileDTO profileDTO = profileRepository.getProfile(message.getChatId());
                 profileDTO.setStep(ProfileStep.Done);
                 profileRepository.update(profileDTO);

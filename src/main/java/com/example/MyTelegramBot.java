@@ -54,7 +54,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(update.getMessage().getChatId());
                 if (dto != null && dto.getVisible()){
                     if (update.getMessage().getChatId().equals(dto.getId())){
-                        System.out.println(update);
                         Message message = update.getMessage();
                         superAdminControler.handle(message);
                     }

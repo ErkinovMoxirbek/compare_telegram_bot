@@ -26,6 +26,7 @@ public class SuperAdminControler {
     public void handle(Message message){
         if (message.hasDocument()){
             if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)){
+                System.out.println(message.getDocument().getFileSize());
                 Document document = message.getDocument();
                 fileHandlerService.handleDocument(message,document);
             }else {

@@ -64,7 +64,6 @@ public class InlineKeyBoardUtil {
             row = new LinkedList<>();
             int index = path.lastIndexOf('/');
             String newPath = path.substring(0,index);
-
             InlineKeyboardButton button = InlineKeyBoardUtil.button("\uD83D\uDD19 Orqaga","Back:" + newPath);
             row.add(button);
             rowList.add(row);

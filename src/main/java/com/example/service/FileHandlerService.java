@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.MyTelegramBot;
 import com.example.dto.FileDTO;
+import com.example.dto.ProfileDTO;
 import com.example.repository.ProfileRepository;
 import com.example.util.InlineKeyBoardUtil;
 import com.example.util.ReplyKeyboardUtil;
@@ -121,45 +122,48 @@ public class FileHandlerService {
                     }
                 }
             }
+            ProfileDTO dto = profileRepository.getProfile(message.getChatId());
+            dto.setNowPath(directoryPath);
+            profileRepository.update(dto);
         }if (list.size() != 0){
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setText("FAYLLAR");
+            sendMessage.setText("Siz " + directoryPath + " papkasidasiz faylni yuborishingiz mumkin!");
             sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list,list.get(0).getPath()));
-            telegramBot.sendMsg(sendMessage);
-            sendMessage.setText("Siz " + directoryPath + " papkasidasiz faylni yuborishingiz mumkin!" );
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             telegramBot.sendMsg(sendMessage);
         }
     }
     public void getEditFile(Message message,String path){
-        System.out.println(path);
+        System.out.println(path + "shetdan chiqvoti");
         java.io.File directory = new java.io.File(path);
         List<FileDTO>list = new LinkedList<>();
+        int countDirectory = 0;
         if (directory.isDirectory()) {
             java.io.File[] files = directory.listFiles();
             if (files != null) {
                 for (java.io.File file : files) {
                     if (file.isDirectory()){
+                        countDirectory++;
                         FileDTO dto = new FileDTO();
                         dto.setName(file.getName());
                         dto.setPath(file.getPath());
                         list.add(dto);
                     }
                 }
+                if (countDirectory == 0){
+                    FileDTO file = new FileDTO();
+                    file.setName("Bu yerda papka mavjud emas");
+                    file.setPath("null");
+                    list.add(file);
+                }
             }
         }if (list.size() != 0){
             EditMessageText send = new EditMessageText();
             send.setChatId(message.getChatId());
-            send.setText("FAYLLAR");
+            send.setText("Siz " + path + " papkasidasiz faylni yuborishingiz mumkin!");
             send.setMessageId(message.getMessageId());
             send.setReplyMarkup(InlineKeyBoardUtil.getFile(list,path));
             telegramBot.sendMsg(send);
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Siz " + path + " papkasidasiz faylni yuborishingiz mumkin!" );
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            sendMessage.setChatId(message.getChatId());
-            telegramBot.sendMsg(sendMessage);
         }
     }
 }

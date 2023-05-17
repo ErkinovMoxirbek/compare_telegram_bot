@@ -178,7 +178,7 @@ public class SuperAdminService {
         } else if (file.isDirectory() && profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)){
             fileHandlerService.getEditFile(message,path);
         }else {
-            System.out.println("Excel fayl topilmadi.");
+            System.out.println("fayl topilmadi.");
         }
     }
 

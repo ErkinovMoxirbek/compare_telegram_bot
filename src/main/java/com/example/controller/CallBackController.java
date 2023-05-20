@@ -18,10 +18,10 @@ public class CallBackController {
     public void handle(String text,Message message){
         if (text.startsWith("Check/")){
             String [] arr = text.split("/");
-            adminService.checkAdmin(Long.valueOf(arr[1]),message);
+            superAdminService.checkAdmin(Long.valueOf(arr[1]),message);
         } else if (text.startsWith("NotCheck/")) {
             String [] arr = text.split("/");
-            adminService.notCheckAdmin(Long.valueOf(arr[1]),message);
+            superAdminService.notCheckAdmin(Long.valueOf(arr[1]),message);
         }else if (text.startsWith("delete/")){
             String [] arr = text.split("/");
             superAdminService.deleteAdmins(message,message.getText(),arr[1]);
@@ -30,13 +30,13 @@ public class CallBackController {
             ProfileDTO profile = profileRepository.getProfile(message.getChatId());
             profile.setNowPath(arr[1]);
             profileRepository.update(profile);
-            superAdminService.sendFile(arr[1],message);
+            fileHandlerService.sendFile(arr[1],message);
         } else if (text.startsWith("Back:")) {
             String [] arr = text.split(":");
-            if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)){
-                superAdminService.getEditFile(message,arr[1]);
-            } else if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)) {
+            if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)){
                 fileHandlerService.getEditFile(message,arr[1]);
+            } else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)) {
+                fileHandlerService.setEditFile(message,arr[1]);
             }
         }
     }

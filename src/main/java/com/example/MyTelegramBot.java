@@ -1,8 +1,10 @@
 package com.example;
 
+import com.example.controller.AdminController;
 import com.example.controller.CallBackController;
 import com.example.controller.MainController;
 import com.example.controller.SuperAdminControler;
+import com.example.dto.AdminProfileDTO;
 import com.example.dto.SuperAdminProfileDTO;
 import com.example.repository.ConfidentialityRepository;
 import com.example.repository.ExternalBlockRepository;
@@ -32,11 +34,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private SuperAdminService superAdminService = new SuperAdminService(this,profileRepository,confidentialityRepository,fileHandlerService);
     private ComparisonService comparisonService = new ComparisonService(profileRepository,internalBlockRepository,externalBlockRepository,this);
     private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService,superAdminService,fileHandlerService);
-    private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository,superAdminControler);
+    private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository,superAdminControler,fileHandlerService);
     private CallBackController callBackController = new CallBackController(superAdminService,adminService,profileRepository,fileHandlerService);
     private CategoryService categoryService = new CategoryService(profileService,profileRepository,this);
-    private MainController mainController  = new MainController(profileRepository,profileService,comparisonService,this,adminService,categoryService);
-
+    private MainController mainController  = new MainController(profileRepository,profileService,comparisonService,this,adminService,categoryService,superAdminService);
+    private AdminController adminController = new AdminController(this,profileRepository,confidentialityRepository,fileHandlerService,adminService,comparisonService,profileService);
 
     @Override
     public String getBotUsername() {
@@ -52,10 +54,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         try {
             if (update.hasMessage()){
                 SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(update.getMessage().getChatId());
+                AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(update.getMessage().getChatId());
                 if (dto != null && dto.getVisible()){
                     if (update.getMessage().getChatId().equals(dto.getId())){
                         Message message = update.getMessage();
                         superAdminControler.handle(message);
+                    }
+                }else if (adminProfileDTO != null && adminProfileDTO.getVisible()){
+                    if (update.getMessage().getChatId().equals(adminProfileDTO.getId())){
+                        Message message = update.getMessage();
+                        adminController.handle(message);
                     }
                 }else {
                     System.out.println(update);

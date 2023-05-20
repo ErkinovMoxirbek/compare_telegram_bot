@@ -30,6 +30,7 @@ public class SuperAdminService {
     public void myAdmins(Message message, String text){
         List<AdminProfileDTO>list = profileRepository.getAdminAll();
         SendMessage sendMessage = new SendMessage();
+        int count = 0;
         if (list.size() == 0){
             sendMessage.setText("Sizda adminlar yo'q!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
@@ -38,8 +39,16 @@ public class SuperAdminService {
         }else {
             sendMessage.setChatId(message.getChatId());
             for (AdminProfileDTO a : list){
-                sendMessage.setText("Ism: " + a.getName() + "\nFamiliya: " + a.getSurname() + "\nTelefon nomer: " + a.getPhone());
-                sendMessage.setReplyMarkup(InlineKeyBoardUtil.deleteAdmin(a.getId(),message.getMessageId()));
+                if (a.getVisible()){
+                    count++;
+                    sendMessage.setText("Ism: " + a.getName() + "\nFamiliya: " + a.getSurname() + "\nTelefon nomer: " + a.getPhone());
+                    sendMessage.setReplyMarkup(InlineKeyBoardUtil.deleteAdmin(a.getId(),message.getMessageId()));
+                    myTelegramBot.sendMsg(sendMessage);
+                }
+            }
+            if (count == 0){
+                sendMessage.setText("Sizda adminlar yo'q!");
+                sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
                 myTelegramBot.sendMsg(sendMessage);
             }
         }
@@ -121,72 +130,48 @@ public class SuperAdminService {
         sendMessage.setReplyMarkup(ReplyKeyboardUtil.settingsMenu());
         myTelegramBot.sendMsg(sendMessage);
     }
-    public void getFile(Message message){
-        String directoryPath = "Base"; // Papka yo'lini o'zgartiring
-        File directory = new File(directoryPath);
-        List<FileDTO>list = new LinkedList<>();
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    FileDTO dto = new FileDTO();
-                    dto.setName(file.getName());
-                    dto.setPath(file.getPath());
-                    list.add(dto);
-                }
-            }
-        }if (list.size() != 0){
-            SendMessage sendMessage = new SendMessage();
+    public void checkAdmin(Long adminId,Message message ){
+        SendMessage sendMessage = new SendMessage();
+        AdminProfileDTO dto = profileRepository.getAdminProfile(adminId);
+        if (profileRepository.getAdminProfile(adminId).getVisible()){
+            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setText("FAYLLAR");
-            sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list,list.get(0).getPath()));
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
+            myTelegramBot.sendMsg(sendMessage);
+            myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
+        }else {
+            myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
+            dto.setVisible(Boolean.TRUE);
+            profileRepository.updateAdmin(dto);
+            sendMessage.setChatId(adminId);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
+            sendMessage.setText("\uD83E\uDD73 Siz admin sifatida qabul qildingiz!");
+            myTelegramBot.sendMsg(sendMessage);
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Bajarildi ✅");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);
         }
     }
-    public void getEditFile(Message message,String path){
-        System.out.println(path);
-        File directory = new File(path);
-        List<FileDTO>list = new LinkedList<>();
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    FileDTO dto = new FileDTO();
-                    dto.setName(file.getName());
-                    dto.setPath(file.getPath());
-                    list.add(dto);
-                }
-            }
-        }if (list.size() != 0){
-            EditMessageText send = new EditMessageText();
-            send.setChatId(message.getChatId());
-            send.setText("FAYLLAR");
-            send.setMessageId(message.getMessageId());
-            send.setReplyMarkup(InlineKeyBoardUtil.getFile(list,path));
-            myTelegramBot.sendMsg(send);
-        }
-    }
-
-    public void sendFile(String path,Message message) {
-        String [] arr = path.split("/");
-        System.out.println(arr[0]);
-        File file = new File(path);
-        if (!file.isDirectory() && profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)) {
-            sendDoc(file,message);
-        } else if (file.isDirectory() && profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)){
-            getEditFile(message,path);
-        } else if (file.isDirectory() && profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)){
-            fileHandlerService.getEditFile(message,path);
+    public void notCheckAdmin(Long adminId ,Message message){
+        SendMessage sendMessage = new SendMessage();
+        if (profileRepository.getAdminProfile(adminId) == null){
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan bajarilib bol'ingan!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
+            myTelegramBot.sendMsg(sendMessage);
+            myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
         }else {
-            System.out.println("fayl topilmadi.");
+            myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
+            profileRepository.removeAdmin(adminId);
+            sendMessage.setChatId(adminId);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
+            sendMessage.setText("\uD83D\uDE41 Sizni admin sifatida qabul qilmadi!");
+            myTelegramBot.sendMsg(sendMessage);
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Bajarildi ✅");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
+            myTelegramBot.sendMsg(sendMessage);
         }
-    }
-
-    private void sendDoc(File file,Message message) {
-        SendDocument sendDocument = new SendDocument();
-        sendDocument.setChatId(message.getChatId()); // Foydalanuvchi chat ID sini o'zgartiring
-        sendDocument.setDocument(new InputFile(file));
-        myTelegramBot.sendDoc(sendDocument);
-        System.out.println(" fayl foydalanuvchiga muvaffaqiyatli yuborildi.");
     }
 }

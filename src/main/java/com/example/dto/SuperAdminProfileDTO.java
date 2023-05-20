@@ -10,6 +10,6 @@ public class SuperAdminProfileDTO {
     private ProfileStep step;
     private Boolean visible;
     public String writableString(){
-        return id + "#" + step + "#" + visible;
+        return id + "#" + step + "#" + visible ;
     }
 }

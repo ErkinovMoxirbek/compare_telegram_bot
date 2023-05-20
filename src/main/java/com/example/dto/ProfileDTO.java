@@ -11,7 +11,7 @@ public class ProfileDTO {
     private ProfileStep step;
     private LocalDateTime createdDate = LocalDateTime.now();
     private String nowPath ;
-    private String lastMessageId;
+    private Integer lastMessageId = 0;
     public String writableString() {
         return id + "#" + step + "#" + createdDate + "#" + nowPath + "#" + lastMessageId;
     }

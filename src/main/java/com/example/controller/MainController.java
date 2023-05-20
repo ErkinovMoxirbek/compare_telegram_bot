@@ -6,10 +6,7 @@ import com.example.dto.ProfileDTO;
 import com.example.dto.SuperAdminProfileDTO;
 import com.example.enums.ProfileStep;
 import com.example.repository.ProfileRepository;
-import com.example.service.CategoryService;
-import com.example.service.ComparisonService;
-import com.example.service.ProfileService;
-import com.example.service.AdminService;
+import com.example.service.*;
 import com.example.util.ReplyKeyboardUtil;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,6 +21,7 @@ public class MainController {
     private MyTelegramBot myTelegramBot;
     private AdminService adminService;
     private CategoryService categoryService;
+    private SuperAdminService superAdminService;
     public void handle(String text, Message message) throws MalformedURLException {
         if (text != null){
             if (text.equals("\uD83D\uDDD1 Bekor qilish")){

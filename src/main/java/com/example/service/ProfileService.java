@@ -54,7 +54,11 @@ public class ProfileService {
                 "Yoki botdan :\n" +
                 "⚠️ Iltimos tashqi blok seriya raqamining ilk 8 ta belgisini to'g'ri kiriting:\n" +
                 "degan javob olasiz\uD83D\uDE09");
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+        if (profileRepository.getAdminProfile(message.getChatId()) != null){
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
+        }else {
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+        }
         myTelegramBot.sendMsg(sendMessage);
     }
 }

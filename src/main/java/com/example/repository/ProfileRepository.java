@@ -36,7 +36,7 @@ public class ProfileRepository {
                 profileEntity.setStep(ProfileStep.valueOf(arr[1]));
                 profileEntity.setCreatedDate(LocalDateTime.parse(arr[2]));
                 profileEntity.setNowPath(arr[3]);
-                profileEntity.setLastMessageId(arr[4]);
+                profileEntity.setLastMessageId(Integer.valueOf(arr[4]));
                 return profileEntity;
             }).collect(Collectors.toList());
         } catch (IOException e) {

@@ -47,26 +47,41 @@ public class AdminService {
         myTelegramBot.sendMsg(sendMessage);
     }
     public void enterName(Message message){
-        AdminProfileDTO dto = profileRepository.getAdminProfile(message.getChatId());
-        dto.setName(message.getText());
-        dto.setStep(ProfileStep.Enter_surname);
-        profileRepository.updateAdmin(dto);
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("Familyangizni kiritng!");
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-        myTelegramBot.sendMsg(sendMessage);
+        AdminProfileDTO dto = profileRepository.getAdminProfile(message.getChatId());
+        if (message.getText().matches("^[a-zA-Z]+$")){
+            dto.setName(message.getText());
+            dto.setStep(ProfileStep.Enter_surname);
+            profileRepository.updateAdmin(dto);
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Familyangizni kiritng!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Siz kiritgan ism mantiqga mos emas!\nIltimos, tog'ri shaklda qayta urining!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }
+
     }
     public void enterSurname(Message message){
         AdminProfileDTO dto = profileRepository.getAdminProfile(message.getChatId());
-        dto.setSurname(message.getText());
-        dto.setStep(ProfileStep.Enter_phone);
-        profileRepository.updateAdmin(dto);
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("Telefon raqamingizni jo'nating!");
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.phoneKeyboard());
-        myTelegramBot.sendMsg(sendMessage);
+        if (message.getText().matches("^[a-zA-Z]+$")){
+            dto.setSurname(message.getText());
+            dto.setStep(ProfileStep.Enter_phone);
+            profileRepository.updateAdmin(dto);
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Telefon raqamingizni jo'nating yoki kiriting!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.phoneKeyboard());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Siz kiritgan familya mantiqga mos emas!\nIltimos, tog'ri shaklda qayta urining!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }
     }
     public void enterPhone(Message message){
         Contact contact = message.getContact();
@@ -81,66 +96,10 @@ public class AdminService {
         sendMessage.setReplyMarkup(InlineKeyBoardUtil.getCheck(message.getChatId(),message.getMessageId()));
         sendMessage.setText(dto.getName() + " " + dto.getSurname() + ";\n" + "Telefon nomeri: " + dto.getPhone() + ";\nFoydalanuvchi adminlikni talab qilmoqda!\nQabul qilasizmi?" );
         for(SuperAdminProfileDTO d : profileRepository.getSuperAdminAll()){
-            sendMessage.setChatId(d.getId());
-            myTelegramBot.sendMsg(sendMessage);
-        }
-    }
-    public void login(Message message){
-        SendMessage sendMessage = new SendMessage();
-        if (profileRepository.getSuperAdminProfile(message.getChatId()) != null && profileRepository.getSuperAdminProfile(message.getChatId()).getVisible()){
-            message.setText("/start");
-            superAdminControler.handle(message);
-        }
-        sendMessage.setText("Loginni kiriting!");
-        sendMessage.setChatId(message.getChatId());
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-        myTelegramBot.sendMsg(sendMessage);
-        if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
-            profileRepository.removeSuperAdmin(message.getChatId());
-        }
-        SuperAdminProfileDTO dto = new SuperAdminProfileDTO();
-        dto.setId(message.getChatId());
-        dto.setStep(ProfileStep.Enter_login);
-        profileRepository.saveSuperAdmin(dto);
-    }
-    public void password(Message message){
-        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
-        if (!confidentialityRepository.getConfidentiality("admin").getLogin().equals(message.getText())){
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Xatto! Qayta urinig!");
-            sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            myTelegramBot.sendMsg(sendMessage);
-        }else {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Parolni kiriting!");
-            sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            myTelegramBot.sendMsg(sendMessage);
-            dto.setStep(ProfileStep.Enter_password);
-            profileRepository.updateSuperAdmin(dto);
-        }
-    }
-    public void checkLoginPassword(Message message){
-        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
-        if (!confidentialityRepository.getConfidentiality("admin").getPassword().equals(message.getText())){
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Xatto! Qayta urinig!");
-            sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
-            myTelegramBot.sendMsg(sendMessage);
-        }else {
-            if (profileRepository.getAdminProfile(message.getChatId()) != null){
-                profileRepository.removeAdmin(message.getChatId());
+            if (d.getVisible()){
+                sendMessage.setChatId(d.getId());
+                myTelegramBot.sendMsg(sendMessage);
             }
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Muvaffaqiyatli!");
-            sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
-            myTelegramBot.sendMsg(sendMessage);
-            dto.setStep(ProfileStep.Done);
-            dto.setVisible(Boolean.TRUE);
-            profileRepository.updateSuperAdmin(dto);
         }
     }
 }

@@ -10,6 +10,7 @@ import com.example.service.*;
 import com.example.util.ReplyKeyboardUtil;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.net.MalformedURLException;
@@ -29,18 +30,15 @@ public class MainController {
                 profileDTO.setStep(ProfileStep.Done);
                 profileRepository.update(profileDTO);
                 if ( profileRepository.getAdminProfile(message.getChatId()) != null && !profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ){
-                    AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(message.getChatId());
-                    adminProfileDTO.setStep(ProfileStep.Done);
-                    profileRepository.updateAdmin(adminProfileDTO);
+                    profileRepository.removeAdmin(message.getChatId());
+                }if ( profileRepository.getSuperAdminProfile(message.getChatId()) != null && !profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ){
+                    profileRepository.removeSuperAdmin(message.getChatId());
                 }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setText("Bo'limlarni birni tanlang!");
                 sendMessage.setChatId(message.getChatId());
                 sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
                 myTelegramBot.sendMsg(sendMessage);
-                return;
-            } else if (text.startsWith("/")) {
-                command(message);
                 return;
             } else if (text.equals("\uD83D\uDCD1 Yo'riqnoma")){
                 profileService.manual(message);
@@ -53,7 +51,14 @@ public class MainController {
                 profileDTO.setStep(ProfileStep.Done);
                 profileRepository.update(profileDTO);
                 comparisonService.internalBlockEnter(message);
-            } else if (profileRepository.getProfile(message.getChatId()) != null) {
+            }else if (profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_phone) || message.getText().startsWith("+998") ) {
+                if ( message.getText().startsWith("+998")){
+                    Contact contact = new Contact();
+                    contact.setPhoneNumber(text);
+                    message.setContact(contact);
+                }
+                adminService.enterPhone(message);
+            }else if (profileRepository.getProfile(message.getChatId()) != null) {
                  if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_Internal_Block)||
                         profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_Internal_Block)||
                         profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_External_Block)) {
@@ -63,28 +68,27 @@ public class MainController {
                     comparisonService.externalBlockEnter(message);
                 }
             }
-            if ( profileRepository.getAdminProfile(message.getChatId()) != null){
+            if (profileRepository.getAdminProfile(message.getChatId()) != null ){
                 if ( profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_name) ){
                     adminService.enterName(message);
                 }
-                else if (profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_surname) ) {
+                else if (profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_surname) ) {
                     adminService.enterSurname(message);
                 }
-            }if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
-                if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_login)) {
-                    adminService.password(message);
+            }if (profileRepository.getSuperAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()) == null){
+                if ( profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_password)){
+                    superAdminService.checkLoginPassword(message);
                 }
-                else if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_password)){
-                    adminService.checkLoginPassword(message);
+                else if (profileRepository.getSuperAdminProfile(message.getChatId()) != null && profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_login)) {
+                    superAdminService.password(message);
                 }
             }
         }
         else if (message.hasContact()){
-            if (profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_phone) ) {
+            if (profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_phone) || message.getText().startsWith("+998") ) {
                 adminService.enterPhone(message);
             }
-        }
-         else {
+        }else {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setText("Bo'limni tanlang!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
@@ -92,45 +96,44 @@ public class MainController {
             myTelegramBot.sendMsg(sendMessage);
         }
     }
-    public void command(Message message){
-        if(message.getText().equals("/admin")){
-            if (profileRepository.getAdminProfile(message.getChatId()) == null ||
-                    profileRepository.getAdminProfile(message.getChatId()).getName().equals("null") ||
-                    profileRepository.getAdminProfile(message.getChatId()).getSurname().equals("null")  ||
-                    profileRepository.getAdminProfile(message.getChatId()).getPhone().equals("null") ) {
-                ProfileDTO dto = profileRepository.getProfile(message.getChatId());
-                dto.setStep(ProfileStep.Done);
-                profileRepository.update(dto);
-                adminService.create(message);
-            }else{
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setText("So'rovnoma super adminga yuborilgan iltimos kuting!");
-                sendMessage.setChatId(message.getChatId());
-                sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
-                myTelegramBot.sendMsg(sendMessage);
-            }
+    public void command(Message message) throws MalformedURLException {
+        if(message.getText().equals("/admin") ){
+                if (profileRepository.getAdminProfile(message.getChatId()) == null ||
+                        profileRepository.getAdminProfile(message.getChatId()).getName().equals("null") ||
+                        profileRepository.getAdminProfile(message.getChatId()).getSurname().equals("null")  ||
+                        profileRepository.getAdminProfile(message.getChatId()).getPhone().equals("null") ) {
+                    adminService.create(message);
+                }else{
+                    SendMessage sendMessage = new SendMessage();
+                    sendMessage.setText("So'rovnoma super adminga yuborilgan iltimos kuting!");
+                    sendMessage.setChatId(message.getChatId());
+                    sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
+                    myTelegramBot.sendMsg(sendMessage);
+                }
         }
         else if (message.getText().equals("/start") ) {
             if (profileRepository.getProfile(message.getChatId()) == null) {
                 categoryService.createProfile(message);
             }
-            if (!profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done)  ) {
-                if ( profileRepository.getAdminProfile(message.getChatId()) != null && !profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ){
-                    AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(message.getChatId());
-                    adminProfileDTO.setStep(ProfileStep.Done);
-                    profileRepository.updateAdmin(adminProfileDTO);
-                }
-                ProfileDTO profileDTO = profileRepository.getProfile(message.getChatId());
-                profileDTO.setStep(ProfileStep.Done);
-                profileRepository.update(profileDTO);
-
+            else if ( profileRepository.getAdminProfile(message.getChatId()) != null && !profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ){
+                AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(message.getChatId());
+                adminProfileDTO.setStep(ProfileStep.Done);
+                profileRepository.updateAdmin(adminProfileDTO);
             }
+            ProfileDTO profileDTO = profileRepository.getProfile(message.getChatId());
+            profileDTO.setStep(ProfileStep.Done);
+            profileRepository.update(profileDTO);
             if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done)) {
                 categoryService.helloMenu(message);
             }
         }
         else if (message.getText().equals("/super_admin")) {
-            adminService.login(message);
+            if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) && profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getVisible() || profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) && profileRepository.getAdminProfile(message.getChatId()) == null){
+                superAdminService.login(message);
+            }
+        }
+        else {
+            handle(message.getText(), message);
         }
     }
 }

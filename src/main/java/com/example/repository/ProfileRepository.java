@@ -45,10 +45,10 @@ public class ProfileRepository {
         return new LinkedList<>();
     }
 
-    public void save(ProfileDTO entity) {
+    public void save(ProfileDTO dto) {
         try {
             PrintWriter printWriter = new PrintWriter(new FileWriter("Profile.txt", true));
-            printWriter.println(entity.writableString());
+            printWriter.println(dto.writableString());
 
             printWriter.flush();
             printWriter.close();

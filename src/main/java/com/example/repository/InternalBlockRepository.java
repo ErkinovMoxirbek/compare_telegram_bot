@@ -97,13 +97,10 @@ public class InternalBlockRepository {
         DataFormatter dataFormatter = new DataFormatter();
         List<InternalBlockDTO> list = new LinkedList<>();
         InternalBlockDTO entity = new InternalBlockDTO();
-        // har bir qator bo'yicha ma'lumotlarni o'qish
         for (Row row : sheet) {
             c += 2;
-            // har bir qatori ustida yurish
             for (Cell cell : row) {
                 b++;
-                // cell-ni bo'sh qolishi mumkin
                 if (cell.getCellType() == CellType.BLANK) {
                     System.out.print(" ");
                 }else if (b % 2 == 1){

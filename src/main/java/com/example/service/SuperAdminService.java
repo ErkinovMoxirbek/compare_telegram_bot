@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -96,17 +97,25 @@ public class SuperAdminService {
         profileRepository.updateSuperAdmin(dto);
     }
     public void saveLogin(Message message){
-        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
-        ConfidentialityDTO confidentialityDTO = confidentialityRepository.getConfidentiality("admin");
-        dto.setStep(ProfileStep.Done);
-        confidentialityDTO.setLogin(message.getText());
-        confidentialityRepository.update(confidentialityDTO);
-        profileRepository.updateSuperAdmin(dto);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("O'zgartirildi ✅");
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.settingsMenu());
-        myTelegramBot.sendMsg(sendMessage);
+        if (!message.getText().startsWith("/")){
+            SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
+            ConfidentialityDTO confidentialityDTO = confidentialityRepository.getConfidentiality("admin");
+            dto.setStep(ProfileStep.Done);
+            confidentialityDTO.setLogin(message.getText());
+            confidentialityRepository.update(confidentialityDTO);
+            profileRepository.updateSuperAdmin(dto);
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("O'zgartirildi ✅");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.settingsMenu());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            sendMessage.setText("Kommanda login bo'la olmaydi iltimos qayta urining!");
+            sendMessage.setChatId(message.getChatId());
+            myTelegramBot.sendMsg(sendMessage);
+        }
     }
     public void editPassword(Message message){
         SendMessage sendMessage = new SendMessage();
@@ -118,22 +127,30 @@ public class SuperAdminService {
         profileRepository.updateSuperAdmin(dto);
     }
     public void savePassword(Message message){
-        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
-        ConfidentialityDTO confidentialityDTO = confidentialityRepository.getConfidentiality("admin");
-        dto.setStep(ProfileStep.Done);
-        confidentialityDTO.setPassword(message.getText());
-        confidentialityRepository.update(confidentialityDTO);
-        profileRepository.updateSuperAdmin(dto);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("O'zgartirildi ✅");
-        sendMessage.setReplyMarkup(ReplyKeyboardUtil.settingsMenu());
-        myTelegramBot.sendMsg(sendMessage);
+        if (!message.getText().startsWith("/")){
+            SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
+            ConfidentialityDTO confidentialityDTO = confidentialityRepository.getConfidentiality("admin");
+            dto.setStep(ProfileStep.Done);
+            confidentialityDTO.setPassword(message.getText());
+            confidentialityRepository.update(confidentialityDTO);
+            profileRepository.updateSuperAdmin(dto);
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("O'zgartirildi ✅");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.settingsMenu());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            sendMessage.setText("Kommanda parol bo'la olmaydi iltimos qayta urining!");
+            sendMessage.setChatId(message.getChatId());
+            myTelegramBot.sendMsg(sendMessage);
+        }
     }
     public void checkAdmin(Long adminId,Message message ){
         SendMessage sendMessage = new SendMessage();
         AdminProfileDTO dto = profileRepository.getAdminProfile(adminId);
-        if (profileRepository.getAdminProfile(adminId).getVisible()){
+        if (profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(message.getChatId()) == null){
             sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
@@ -155,9 +172,9 @@ public class SuperAdminService {
     }
     public void notCheckAdmin(Long adminId ,Message message){
         SendMessage sendMessage = new SendMessage();
-        if (profileRepository.getAdminProfile(adminId) == null){
+        if (profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(message.getChatId()) == null){
+            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan bajarilib bol'ingan!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);
             myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
@@ -172,6 +189,66 @@ public class SuperAdminService {
             sendMessage.setText("Bajarildi ✅");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);
+        }
+    }
+    public void login(Message message){
+        SendMessage sendMessage = new SendMessage();
+        if (profileRepository.getSuperAdminProfile(message.getChatId()) != null && profileRepository.getSuperAdminProfile(message.getChatId()).getVisible()){
+            message.setText("/start");
+            Update update = new Update();
+            update.setMessage(message);
+            myTelegramBot.onUpdateReceived(update);
+        }
+        sendMessage.setText("Loginni kiriting!");
+        sendMessage.setChatId(message.getChatId());
+        sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+        myTelegramBot.sendMsg(sendMessage);
+        if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
+            profileRepository.removeSuperAdmin(message.getChatId());
+        }
+        SuperAdminProfileDTO dto = new SuperAdminProfileDTO();
+        dto.setId(message.getChatId());
+        dto.setStep(ProfileStep.Enter_login);
+        profileRepository.saveSuperAdmin(dto);
+    }
+    public void password(Message message){
+        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
+        if (!confidentialityRepository.getConfidentiality("admin").getLogin().equals(message.getText())){
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Xatto! Qayta urinig!");
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Parolni kiriting!");
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+            dto.setStep(ProfileStep.Enter_password);
+            profileRepository.updateSuperAdmin(dto);
+        }
+    }
+    public void checkLoginPassword(Message message){
+        SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(message.getChatId());
+        if (!confidentialityRepository.getConfidentiality("admin").getPassword().equals(message.getText())){
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Xatto! Qayta urinig!");
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            if (profileRepository.getAdminProfile(message.getChatId()) != null){
+                profileRepository.removeAdmin(message.getChatId());
+            }
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Muvaffaqiyatli!");
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
+            myTelegramBot.sendMsg(sendMessage);
+            dto.setStep(ProfileStep.Done);
+            dto.setVisible(Boolean.TRUE);
+            profileRepository.updateSuperAdmin(dto);
         }
     }
 }

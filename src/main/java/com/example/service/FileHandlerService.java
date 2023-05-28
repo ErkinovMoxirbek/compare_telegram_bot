@@ -12,10 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.FileOutputStream;
@@ -25,37 +22,50 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+
 @AllArgsConstructor
 public class FileHandlerService {
     private MyTelegramBot telegramBot;
     private ProfileRepository profileRepository;
+
     public void handleDocument(Message message, Document document) {
-            String fileId = document.getFileId();
-            String filePath = getFilePath(fileId);
-            if (filePath != null) {
-                try {
-                    java.io.File excelFile = downloadFile(filePath);
-                    if (excelFile != null) {
-                        saveFile(excelFile,message,profileRepository.getProfile(message.getChatId()).getNowPath(),document.getFileName());
-                        sendMessageToUser("Fayl saqlandi!", message.getChatId());
-                    } else {
-                        sendMessageToUser("Fayl yuklanmadi.", message.getChatId());
+        // todo
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileId = document.getFileId();
+                String filePath = getFilePath(fileId);
+                if (filePath != null) {
+                    try {
+                        java.io.File excelFile = downloadFile(filePath);
+                        if (excelFile != null) {
+                            Message message1 = sendMessageToUser("Fayl yuklanmoqda...", message.getChatId());
+                            saveFile(excelFile, message, profileRepository.getProfile(message.getChatId()).getNowPath(), document.getFileName());
+                            telegramBot.deleteMsg(new DeleteMessage(message1.getChatId().toString(), message1.getMessageId()));
+                            sendMessageToUser("Fayl saqlandi!", message.getChatId());
+                        } else {
+                            sendMessageToUser("Fayl yuklanmadi.", message.getChatId());
+                        }
+                    } catch (IOException e) {
+                        sendMessageToUser("Xato yuz berdi: " + e.getMessage(), message.getChatId());
                     }
-                } catch (IOException e) {
-                    sendMessageToUser("Xato yuz berdi: " + e.getMessage(), message.getChatId());
+                } else {
+                    sendMessageToUser("Fayl haqida ma'lumot olishda xato yuz berdi. \n " + document.getFileSize(), message.getChatId());
                 }
-            }  else {
-                sendMessageToUser("Fayl haqida ma'lumot olishda xato yuz berdi. \n " + document.getFileSize(), message.getChatId());
             }
-        }
+        }).start();
+    }
 
     private String getFilePath(String fileId) {
         GetFile getFileRequest = new GetFile();
         getFileRequest.setFileId(fileId);
         try {
-            File file = telegramBot.getFile(getFileRequest);
+            org.telegram.telegrambots.meta.api.objects.File file = telegramBot.getFile(getFileRequest);
             String filePath = file.getFilePath();
             if (filePath != null) {
                 return "https://api.telegram.org/file/bot" + telegramBot.getBotToken() + "/" + filePath;
@@ -85,7 +95,13 @@ public class FileHandlerService {
             sendMessageToUser(" fayli topilmadi yoki fayl emas.", message.getChatId());
             return;
         }
-
+        java.io.File directory = new java.io.File(profileRepository.getProfile(message.getChatId()).getNowPath());
+        java.io.File[] files = directory.listFiles();
+        for (java.io.File file : files) {
+            if (file.getName().equals(fileName)) {
+                fileName = UUID.randomUUID().toString();
+            }
+        }
         java.io.File targetFolder = new java.io.File(path);
 
         if (!targetFolder.exists() || !targetFolder.isDirectory()) {
@@ -100,12 +116,13 @@ public class FileHandlerService {
         sendMessageToUser("Fayl muvaffaqiyatli saqlandi!", message.getChatId());
     }
 
-    private void sendMessageToUser(String text, long chatId) {
+    private Message sendMessageToUser(String text, long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(text);
-        telegramBot.sendMsg(sendMessage);
+        return telegramBot.sendMsg(sendMessage);
     }
+
     public void setFile(Message message) {
         String directoryPath = "Base"; // Papka yo'lini o'zgartiring
         java.io.File directory = new java.io.File(directoryPath);
@@ -114,7 +131,7 @@ public class FileHandlerService {
             java.io.File[] files = directory.listFiles();
             if (files != null) {
                 for (java.io.File file : files) {
-                    if (file.isDirectory()){
+                    if (file.isDirectory()) {
                         FileDTO dto = new FileDTO();
                         dto.setName(file.getName());
                         dto.setPath(file.getPath());
@@ -125,31 +142,32 @@ public class FileHandlerService {
             ProfileDTO dto = profileRepository.getProfile(message.getChatId());
             dto.setNowPath(directoryPath);
             profileRepository.update(dto);
-        }if (list.size() != 0){
+        }
+        if (list.size() != 0) {
             if (profileRepository.getProfile(message.getChatId()) != null && !profileRepository.getProfile(message.getChatId()).getLastMessageId().equals(0)) {
-                telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),profileRepository.getProfile(message.getChatId()).getLastMessageId()));
+                telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(), profileRepository.getProfile(message.getChatId()).getLastMessageId()));
             }
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(message.getChatId());
-                sendMessage.setText("Siz " + directoryPath + " papkasidasiz faylni yuborishingiz mumkin!");
-                sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list,list.get(0).getPath()));
-                Message message2 = telegramBot.sendMsg(sendMessage);
-                ProfileDTO dto = profileRepository.getProfile(message.getChatId());
-                dto.setStep(ProfileStep.Save_file);
-                dto.setLastMessageId(message2.getMessageId());
-                profileRepository.update(dto);
-
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("Siz " + directoryPath + " papkasidasiz faylni yuborishingiz mumkin!");
+            sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list, list.get(0).getPath()));
+            Message message2 = telegramBot.sendMsg(sendMessage);
+            ProfileDTO dto = profileRepository.getProfile(message.getChatId());
+            dto.setStep(ProfileStep.Save_file);
+            dto.setLastMessageId(message2.getMessageId());
+            profileRepository.update(dto);
         }
     }
-    public void setEditFile(Message message,String path){
+
+    public void setEditFile(Message message, String path) {
         java.io.File directory = new java.io.File(path);
-        List<FileDTO>list = new LinkedList<>();
+        List<FileDTO> list = new LinkedList<>();
         int countDirectory = 0;
         if (directory.isDirectory()) {
             java.io.File[] files = directory.listFiles();
             if (files != null) {
                 for (java.io.File file : files) {
-                    if (file.isDirectory()){
+                    if (file.isDirectory()) {
                         countDirectory++;
                         FileDTO dto = new FileDTO();
                         dto.setName(file.getName());
@@ -157,26 +175,28 @@ public class FileHandlerService {
                         list.add(dto);
                     }
                 }
-                if (countDirectory == 0){
+                if (countDirectory == 0) {
                     FileDTO file = new FileDTO();
                     file.setName("Bu yerda papka mavjud emas");
                     file.setPath("null");
                     list.add(file);
                 }
             }
-        }if (list.size() != 0){
+        }
+        if (list.size() != 0) {
             EditMessageText send = new EditMessageText();
             send.setChatId(message.getChatId());
             send.setText("Siz " + path + " papkasidasiz faylni yuborishingiz mumkin!");
             send.setMessageId(message.getMessageId());
-            send.setReplyMarkup(InlineKeyBoardUtil.getFile(list,path));
+            send.setReplyMarkup(InlineKeyBoardUtil.getFile(list, path));
             telegramBot.sendMsg(send);
         }
     }
-    public void getFile(Message message){
+
+    public void getFile(Message message) {
         String directoryPath = "Base"; // Papka yo'lini o'zgartiring
         java.io.File directory = new java.io.File(directoryPath);
-        List<FileDTO>list = new LinkedList<>();
+        List<FileDTO> list = new LinkedList<>();
         if (directory.isDirectory()) {
             java.io.File[] files = directory.listFiles();
             if (files != null) {
@@ -187,25 +207,27 @@ public class FileHandlerService {
                     list.add(dto);
                 }
             }
-        }if (list.size() != 0){
-            if (profileRepository.getProfile(message.getChatId()) != null && !profileRepository.getProfile(message.getChatId()).getLastMessageId().equals(0)){
-                telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),profileRepository.getProfile(message.getChatId()).getLastMessageId()));
+        }
+        if (list.size() != 0) {
+            if (profileRepository.getProfile(message.getChatId()) != null && !profileRepository.getProfile(message.getChatId()).getLastMessageId().equals(0)) {
+                telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(), profileRepository.getProfile(message.getChatId()).getLastMessageId()));
             }
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(message.getChatId());
-                sendMessage.setText("FAYLLAR");
-                sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list,list.get(0).getPath()));
-                Message message2 = telegramBot.sendMsg(sendMessage);
-                ProfileDTO dto = profileRepository.getProfile(message.getChatId());
-                dto.setStep(ProfileStep.Download_file);
-                dto.setLastMessageId(message2.getMessageId());
-                profileRepository.update(dto);
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText("FAYLLAR");
+            sendMessage.setReplyMarkup(InlineKeyBoardUtil.getFile(list, list.get(0).getPath()));
+            Message message2 = telegramBot.sendMsg(sendMessage);
+            ProfileDTO dto = profileRepository.getProfile(message.getChatId());
+            dto.setStep(ProfileStep.Download_file);
+            dto.setLastMessageId(message2.getMessageId());
+            profileRepository.update(dto);
         }
     }
-    public void getEditFile(Message message,String path){
+
+    public void getEditFile(Message message, String path) {
         System.out.println(path);
         java.io.File directory = new java.io.File(path);
-        List<FileDTO>list = new LinkedList<>();
+        List<FileDTO> list = new LinkedList<>();
         int countDirectory = 0;
         if (directory.isDirectory()) {
             java.io.File[] files = directory.listFiles();
@@ -216,45 +238,101 @@ public class FileHandlerService {
                     dto.setPath(file.getPath());
                     list.add(dto);
                     countDirectory++;
-                } if (countDirectory == 0){
+                }
+                if (countDirectory == 0) {
                     FileDTO file = new FileDTO();
                     file.setName("Bu yerda papka mavjud emas");
                     file.setPath("null");
                     list.add(file);
                 }
             }
-        }if (list.size() != 0){
+        }
+        if (list.size() != 0) {
             EditMessageText send = new EditMessageText();
             send.setChatId(message.getChatId());
             send.setText("FAYLLAR");
             send.setMessageId(message.getMessageId());
-            send.setReplyMarkup(InlineKeyBoardUtil.getFile(list,path));
+            send.setReplyMarkup(InlineKeyBoardUtil.getFile(list, path));
             telegramBot.sendMsg(send);
         }
     }
-    public void sendFile(String path,Message message) {
-        String [] arr = path.split("/");
+
+    public void sendFile(String path, Message message) {
+        String[] arr = path.split("/");
         System.out.println(arr[0]);
         java.io.File file = new java.io.File(path);
         if (!file.isDirectory() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)) {
-            sendDoc(file,message);
-        } else if (file.isDirectory() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)){
-            getEditFile(message,path);
-        } else if (file.isDirectory() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)){
-            setEditFile(message,path);
-        }else {
+            sendDoc(file, message);
+        } else if (file.isDirectory() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Download_file)) {
+            getEditFile(message, path);
+        } else if (file.isDirectory() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)) {
+            setEditFile(message, path);
+        } else {
             System.out.println("fayl topilmadi.");
         }
     }
 
     private void sendDoc(java.io.File file, Message message) {
-        SendMessage sendMessage = new SendMessage(message.getChatId().toString(),"Jonatilish uchun yuklanmoqda...");
-        Message message2 = telegramBot.sendMsg(sendMessage);
-        SendDocument sendDocument = new SendDocument();
-        sendDocument.setChatId(message.getChatId()); // Foydalanuvchi chat ID sini o'zgartiring
-        sendDocument.setDocument(new InputFile(file));
-        telegramBot.sendDoc(sendDocument);
-        System.out.println(" fayl foydalanuvchiga muvaffaqiyatli yuborildi.");
-        telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message2.getMessageId()));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SendMessage sendMessage = new SendMessage(message.getChatId().toString(), "Jonatilish uchun yuklanmoqda...");
+                Message message2 = telegramBot.sendMsg(sendMessage);
+                SendDocument sendDocument = new SendDocument();
+                sendDocument.setChatId(message.getChatId()); // Foydalanuvchi chat ID sini o'zgartiring
+                sendDocument.setDocument(new InputFile(file));
+                telegramBot.sendDoc(sendDocument);
+                System.out.println(" fayl foydalanuvchiga muvaffaqiyatli yuborildi.");
+                telegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(), message2.getMessageId()));
+            }
+        }).start();
     }
+
+    public void handleMediaFile(Message message) {
+        if (message.hasPhoto() || message.hasVideo()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String fileId;
+                    String fileName;
+                    if (message.hasPhoto()) {
+                        fileId = message.getPhoto().get(message.getPhoto().size() - 1).getFileId();
+                        String time = LocalDateTime.now().toString();
+                        fileName = time.replace(':', '_') + ".jpg"; // Fayl nomini o'zgartiring
+                    } else {
+                        fileId = message.getVideo().getFileId();
+                        fileName = message.getVideo().getFileName(); // Fayl nomini o'zgartiring
+                    }
+
+                    String filePath = getFilePath(fileId);
+
+                    if (filePath != null) {
+                        try {
+                            java.io.File file = downloadFile(filePath);
+                            if (file != null) {
+                                SendMessage sendMessage = new SendMessage();
+                                sendMessage.setText("Fayl yuklanmoqda!");
+                                sendMessage.setChatId(message.getChatId());
+                                Message message1 = telegramBot.sendMsg(sendMessage);
+                                saveFile(file, message, profileRepository.getProfile(message.getChatId()).getNowPath(), fileName);
+                                EditMessageText editMessageText = new EditMessageText();
+                                editMessageText.setMessageId(message1.getMessageId());
+                                editMessageText.setChatId(message.getChatId());
+                                editMessageText.setText("Fayl mufoqiyatli yuklandi");
+                                telegramBot.sendMsg(editMessageText);
+
+                            } else {
+                                sendMessageToUser("Fayl yuklanmadi!", message.getChatId());
+                            }
+                        } catch (IOException e) {
+                            e.getMessage();
+                        }
+                    } else {
+                        sendMessageToUser("Fayl haqida ma'lumot olishda xato yuz berdi",message.getChatId());
+                    }
+        }
+            }).start();
+        }
+    }
+
 }

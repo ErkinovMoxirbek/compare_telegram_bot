@@ -46,25 +46,29 @@ public class InlineKeyBoardUtil {
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
-    public static InlineKeyboardMarkup getFile(List<FileDTO> fileList,String path) {
+    public static InlineKeyboardMarkup getFile(List<FileDTO> fileList, String path) {
         List<List<InlineKeyboardButton>> rowList = new LinkedList<>();
-        List<InlineKeyboardButton> row ;
-        for(FileDTO dto : fileList){
+        List<InlineKeyboardButton> row;
+        for (FileDTO dto : fileList) {
             row = new LinkedList<>();
-            dto.setPath(dto.getPath().replace("\\","/"));
-            InlineKeyboardButton button1 = InlineKeyBoardUtil.button(dto.getName() ,"File:" + dto.getPath());
-            row.add(button1);
+            dto.setPath(dto.getPath().replace("\\", "/"));
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(dto.getName());
+            button.setCallbackData("File:" + dto.getPath());
+            row.add(button);
             rowList.add(row);
         }
-        String [] arr = path.split("/");
+        String[] arr = path.split("/");
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         System.out.println(path);
-        if (arr.length >= 2){
+        if (arr.length >= 2) {
             System.out.println("button back added");
             row = new LinkedList<>();
             int index = path.lastIndexOf('/');
-            String newPath = path.substring(0,index);
-            InlineKeyboardButton button = InlineKeyBoardUtil.button("\uD83D\uDD19 Orqaga","Back:" + newPath);
+            String newPath = path.substring(0, index);
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText("\uD83D\uDD19 Orqaga");
+            button.setCallbackData("Back:" + newPath);
             row.add(button);
             rowList.add(row);
         }

@@ -7,10 +7,7 @@ import com.example.dto.SuperAdminProfileDTO;
 import com.example.enums.ProfileStep;
 import com.example.repository.ConfidentialityRepository;
 import com.example.repository.ProfileRepository;
-import com.example.service.AdminService;
-import com.example.service.ComparisonService;
-import com.example.service.FileHandlerService;
-import com.example.service.ProfileService;
+import com.example.service.*;
 import com.example.util.ReplyKeyboardUtil;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,15 +20,18 @@ public class AdminController {
     private ProfileRepository profileRepository;
     private ConfidentialityRepository confidentialityRepository;
     private FileHandlerService fileHandlerService;
-    private AdminService adminService;
     private ComparisonService comparisonService;
     private ProfileService profileService;
+    private SuperAdminService superAdminService;
     public void handle(Message message){
-        if (message.hasDocument()){
+        if (message.hasDocument() || message.hasPhoto() || message.hasVideo()){
             if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file)){
-                System.out.println(message.getDocument().getFileSize());
-                Document document = message.getDocument();
-                fileHandlerService.handleDocument(message,document);
+                if (message.hasDocument()){
+                    Document document = message.getDocument();
+                    fileHandlerService.handleDocument(message,document);
+                } else {
+                    fileHandlerService.handleMediaFile(message);
+                }
             }else {
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(message.getChatId());
@@ -46,6 +46,8 @@ public class AdminController {
             if (!profileDTO.getLastMessageId().equals(0)){
                 myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),profileDTO.getLastMessageId()));
                 profileDTO.setLastMessageId(0);
+            }if ( profileRepository.getSuperAdminProfile(message.getChatId()) != null && !profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ){
+                profileRepository.removeSuperAdmin(message.getChatId());
             }
             profileRepository.update(profileDTO);
             AdminProfileDTO dto = profileRepository.getAdminProfile(message.getChatId());
@@ -57,46 +59,70 @@ public class AdminController {
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
             myTelegramBot.sendMsg(sendMessage);
         } else if (message.getText().startsWith("/")) {
+            if (message.getText().equals("/start")){
+                command(message);
+                return;
+            }
+            else if (profileRepository.getAdminProfile(message.getChatId()) != null && !profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)||
+                    profileRepository.getSuperAdminProfile(message.getChatId()) != null && !profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)||
+                    profileRepository.getProfile(message.getChatId()) != null && !profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done)){
+                message.setText(message.getText().replace("/","+"));
+                handle(message);
+                return;
+            }
             command(message);
-        } else if (message.getText().equals("✅ Bloklarning bir biriga mosligini tekshirish")){
+            return;
+        }if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
+            if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_login)) {
+                superAdminService.password(message);
+                return;
+            }
+            else if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_password)) {
+                superAdminService.checkLoginPassword(message);
+                return;
+            }
+        } if(message.getText().startsWith("+")){
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setText("Tog'ri shaklda kiritilmadi! \nQayta urining!");
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            sendMessage.setChatId(message.getChatId());
+            myTelegramBot.sendMsg(sendMessage);
+        }else if (message.getText().equals("✅ Bloklarning bir biriga mosligini tekshirish")){
             ProfileDTO profileDTO = profileRepository.getProfile(message.getChatId());
             profileDTO.setStep(ProfileStep.Done);
             profileRepository.update(profileDTO);
             comparisonService.internalBlockEnter(message);
-        } else if (message.getText().equals("\uD83D\uDCC1 Base")) {
+        }
+        //adminga kerak emasligi uchun ochirildi
+        /*else if (message.getText().equals("\uD83D\uDCC1 Base")) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(message.getChatId());
             sendMessage.setText("\uD83D\uDCC1 Ma'lumotlar ombori");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuBaseKeyboard());
             myTelegramBot.sendMsg(sendMessage);
-        } else if (message.getText().equals("\uD83D\uDCE4 Yuklab olish")) {
+        }*/
+        else if (message.getText().equals("\uD83D\uDCE4 Yuklab olish")) {
             fileHandlerService.getFile(message);
         }else if (message.getText().equals("\uD83D\uDCE5 Yuklab qo'yish")) {
             fileHandlerService.setFile(message);
         } else if (message.getText().equals("\uD83D\uDCD1 Yo'riqnoma")) {
             profileService.manual(message);
-        }else if (profileRepository.getSuperAdminProfile(message.getChatId()) != null){
-            if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_login)) {
-                adminService.password(message);
+        } if (profileRepository.getProfile(message.getChatId()) != null&& !profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) && !profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_file) && message.getText() != null) {
+            if (message.getText().matches("^[a-zA-Z0-9]+$") && !message.getText().startsWith("/") ){
+                if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_Internal_Block)||
+                        profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_Internal_Block)||
+                        profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_External_Block) ||
+                        profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_External_Block)) {
+                    comparisonService.externalBlockEnter(message);
+                }
+                else {
+                    SendMessage sendMessage = new SendMessage();
+                    sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+                    sendMessage.setText("Seriya harf va raqamda tashkil topgan,\nIltimos tog'ri shaklda kiring!");
+                    sendMessage.setChatId(message.getChatId());
+                    myTelegramBot.sendMsg(sendMessage);
+                }
             }
-            else if (profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_password)){
-                adminService.checkLoginPassword(message);
-            }
-        }else if (profileRepository.getProfile(message.getChatId()) != null) {
-            if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_Internal_Block)||
-                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_Internal_Block)||
-                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Save_External_Block)) {
-                comparisonService.externalBlockEnter(message);
-            }
-            else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_External_Block)){
-                comparisonService.externalBlockEnter(message);
-            }
-        } else {
-            SendMessage send = new SendMessage();
-            send.setText("Super admin paneli sozlanmoqda");
-            send.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
-            send.setChatId(message.getChatId());
-            myTelegramBot.sendMsg(send);
         }
     }
     public void command(Message message){
@@ -108,6 +134,9 @@ public class AdminController {
                 profileDTO.setStep(ProfileStep.Done);
                 profileRepository.save(profileDTO);
             }
+            AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(message.getChatId());
+            adminProfileDTO.setStep(ProfileStep.Done);
+            profileRepository.updateAdmin(adminProfileDTO);
             profileDTO.setStep(ProfileStep.Done);
             profileRepository.update(profileDTO);
             SendMessage sendMessage = new SendMessage();
@@ -115,14 +144,14 @@ public class AdminController {
             sendMessage.setText("\uD83C\uDF89 MIX Helper botiga xush kelibsiz !!!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
             myTelegramBot.sendMsg(sendMessage);
-        } else if (message.getText().equals("/admin")) {
+        } else if (message.getText().equals("/admin") && profileRepository.getSuperAdminProfile(message.getChatId()) == null) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
             sendMessage.setText("Siz adminsiz!");
             sendMessage.setChatId(message.getChatId());
             myTelegramBot.sendMsg(sendMessage);
-        } else if (message.getText().equals("/super-admin")) {
-            adminService.login(message);
+        } else if (message.getText().equals("/super_admin") && profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)) {
+            superAdminService.login(message);
         }
     }
 }

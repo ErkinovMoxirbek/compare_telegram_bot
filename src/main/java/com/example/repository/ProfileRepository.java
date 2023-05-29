@@ -101,6 +101,7 @@ public class ProfileRepository {
                 dto.setStep(ProfileStep.valueOf(arr[3]));
                 dto.setPhone(arr[4]);
                 dto.setVisible(Boolean.valueOf(arr[5]));
+                dto.setStatus(Boolean.valueOf(arr[6]));
                 return dto;
             }).collect(Collectors.toList());
         } catch (IOException e) {

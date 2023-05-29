@@ -14,7 +14,7 @@ public class PCBService {
     private MyTelegramBot myTelegramBot;
     private PCBRepository pcbRepository;
     private ProfileRepository profileRepository;
-    public void searchPCB(String text, Message message) {
+    public void searchPCBByGroup(String text, Message message) {
         PCBDTO pcbdto = null;
         if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code)){
             pcbdto = pcbRepository.getInfoExelByPCBBoxCode(text);
@@ -22,15 +22,57 @@ public class PCBService {
             pcbdto = pcbRepository.getInfoExelByPCBCode(text);
         }else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code)){
             pcbdto = pcbRepository.getInfoExelBySAPCode(text);
+        }else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code)){
+            pcbdto = pcbRepository.getInfoExelBySAPCode(text);
         }
         if (pcbdto != null){
             for (PCBDTO p : pcbRepository.getListExel()){
                 if (p.getGroup().equals(pcbdto.getGroup())){
-                    myTelegramBot.sendMsg(sendMessageToUser("ID: " + p.getId() + ";\nGROUP: " + p.getGroup() + ";\nMODEL NAME SUPPLIER: " + p.getName() + ";\nPCB Box Code Assembly: " + p.getPCBBoxCodeAssembly() + ";\nPCB Code: " + p.getPCBCodeWhole() + ";\nSAP CODE: " + p.getSAPCode() /*+ ";\nKONDITSIONER MODELI: " + p.getModel() + ";"*/,message));
+                    myTelegramBot.sendMsg(sendMessageToUser(pcbRepository.getListExel().get(0).getIdName()
+                            + ": " + p.getId() + ";\n\n" + pcbRepository.getListExel().get(0).getGroupName()
+                            + ": " + p.getGroup() + ";\n\n"+ pcbRepository.getListExel().get(0).getSname()
+                            + ": " + p.getSModel() + ";\n\n"+ pcbRepository.getListExel().get(0).getPCBBoxCodeAssemblyName()
+                            +": " + p.getPCBBoxCodeAssembly() + ";\n\n" + pcbRepository.getListExel().get(0).getPCBCodeWholeName() + ": "
+                            + p.getPCBCodeWhole() + ";\n\n" +  pcbRepository.getListExel().get(0).getSAPCodeName()+": "
+                            + p.getSAPCode() + ";\n\n"+pcbRepository.getListExel().get(0).getModelName()
+                            +": " + p.getModel() + ";",message));
                 }
             }
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            sendMessage.setText("Qidirishni davom ettirishingiz mumkin!!");
+            myTelegramBot.sendMsg(sendMessage);
         }else {
-            SendMessage sendMessage = sendMessageToUser("PCB mavjud emas, qayta urining!",message);
+            SendMessage sendMessage = sendMessageToUser("Xato kiritildi yoki \nPCB mavjud emas, qayta urining!",message);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+        }
+    } public void searchPCBByModel(String model, Message message) {
+        PCBDTO pcbdto = null;
+        if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code)){
+            pcbdto = pcbRepository.getInfoExelByPCBModel(model.toLowerCase());
+        }
+        if (pcbdto != null){
+            for (PCBDTO p : pcbRepository.getListExel()){
+                if (p.getModel() != null && p.getModel().contains(pcbdto.getModel())){
+                    myTelegramBot.sendMsg(sendMessageToUser(pcbRepository.getListExel().get(0).getIdName()
+                            + ": " + p.getId() + ";\n\n" + pcbRepository.getListExel().get(0).getGroupName()
+                            + ": " + p.getGroup() + ";\n\n"+ pcbRepository.getListExel().get(0).getSname()
+                            + ": " + p.getSModel() + ";\n\n"+ pcbRepository.getListExel().get(0).getPCBBoxCodeAssemblyName()
+                            +": " + p.getPCBBoxCodeAssembly() + ";\n\n" + pcbRepository.getListExel().get(0).getPCBCodeWholeName() + ": "
+                            + p.getPCBCodeWhole() + ";\n\n" +  pcbRepository.getListExel().get(0).getSAPCodeName()+": "
+                            + p.getSAPCode() + ";\n\n"+pcbRepository.getListExel().get(0).getModelName()
+                            +": " + p.getModel() + ";",message));
+                }
+            }
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            sendMessage.setText("Qidirishni davom ettirishingiz mumkin!");
+            myTelegramBot.sendMsg(sendMessage);
+        }else {
+            SendMessage sendMessage = sendMessageToUser("Kod no'togri kiritildi yoki \nXatolik mavjud emas, qayta urining!",message);
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             myTelegramBot.sendMsg(sendMessage);
         }

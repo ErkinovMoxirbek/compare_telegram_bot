@@ -14,7 +14,8 @@ public class AdminProfileDTO {
     private ProfileStep step;
     private String phone;
     private Boolean visible = false;
+    private Boolean status = false;
     public String writableString (){
-        return id + "#" + name + "#" + surname + "#" + step + "#" + phone + "#" + visible;
+        return id + "#" + name + "#" + surname + "#" + step + "#" + phone + "#" + visible + "#" + status;
     }
 }

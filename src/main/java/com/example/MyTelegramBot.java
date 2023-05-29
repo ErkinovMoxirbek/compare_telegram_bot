@@ -33,6 +33,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private SuperAdminService superAdminService = new SuperAdminService(this,profileRepository,confidentialityRepository,fileHandlerService);
     private ComparisonService comparisonService = new ComparisonService(profileRepository,internalBlockRepository,externalBlockRepository,this);
     private PCBService pcbService = new PCBService(this,pcbRepository,profileRepository);
+    private ErrorRepository errorRepository = new ErrorRepository();
+    private ErrorService errorService = new ErrorService(this,profileRepository,errorRepository);
+    private ErrorController errorController = new ErrorController(this,errorService,profileRepository);
     private PCBController pcbController = new PCBController(this,profileRepository,pcbService);
     private SuperAdminControler superAdminControler = new SuperAdminControler(this,profileRepository,comparisonService,superAdminService,fileHandlerService);
     private AdminService adminService = new AdminService(profileRepository,this,confidentialityRepository,superAdminControler,fileHandlerService);
@@ -57,31 +60,48 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 SuperAdminProfileDTO dto = profileRepository.getSuperAdminProfile(update.getMessage().getChatId());
                 AdminProfileDTO adminProfileDTO = profileRepository.getAdminProfile(update.getMessage().getChatId());
                 if (dto != null && dto.getVisible()){
+                    if (profileRepository.getProfile(update.getMessage().getChatId()) == null){
+                        categoryService.createProfile(update.getMessage());
+                    }
                     if (update.getMessage().getChatId().equals(dto.getId())){
                         Message message = update.getMessage();
-                        if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/") ){
-                            pcbController.handle(message.getText(),message);
+                        if ( message.getText() != null && !message.getText().equals("\uD83D\uDDD1 Bekor qilish") && !message.getText().startsWith("/")){
+                            if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/")||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code) && !message.getText().startsWith("/") ){
+                                pcbController.handle(message.getText(),message);
+                                return;
+                            }
+                            if (message.getText().equals("❗️ Xatolik kodlari") || profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_Error) && !message.getText().startsWith("/")){
+                                errorController.handle(message.getText(),message);
+                                return;
+                            }
                         }
-                        else{
-                            superAdminControler.handle(message);
-                        }
+                        superAdminControler.handle(message);
                     }
                 }else if (adminProfileDTO != null && adminProfileDTO.getVisible()){
                     if (update.getMessage().getChatId().equals(adminProfileDTO.getId())){
                         Message message = update.getMessage();
-                        if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/")){
-                            pcbController.handle(message.getText(),message);
-                        }else {
-                            adminController.handle(message);
+                        if (!message.getText().equals("\uD83D\uDDD1 Bekor qilish") && !message.getText().startsWith("/")){
+                            if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/")||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code) && !message.getText().startsWith("/") ){
+                                pcbController.handle(message.getText(),message);
+                                return;
+                            }
+                            if (message.getText().equals("❗️ Xatolik kodlari") || profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_Error) && !message.getText().startsWith("/")){
+                                errorController.handle(message.getText(),message);
+                                return;
+                            }
                         }
+                        adminController.handle(message);
+
                     }
                 }else {
                     if (profileRepository.getProfile(update.getMessage().getChatId()) == null){
@@ -96,14 +116,20 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                         mainController.command(message);
                     }
                     if (message.getText() != null){
-                        if ( message.getText().equals("\uD83D\uDD0D PCB qirish") && !message.getText().startsWith("/") && profileRepository.getProfile(message.getChatId()) != null ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") && profileRepository.getProfile(message.getChatId()) != null ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") && profileRepository.getProfile(message.getChatId()) != null ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") && profileRepository.getProfile(message.getChatId()) != null ||
-                                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/") && profileRepository.getProfile(message.getChatId()) != null){
-                            pcbController.handle(message.getText(),message);
+                        if (!message.getText().equals("\uD83D\uDDD1 Bekor qilish") && !message.getText().startsWith("/")){
+                            if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code) && !message.getText().startsWith("/") ||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code) && !message.getText().startsWith("/")||
+                                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code) && !message.getText().startsWith("/") ){
+                                pcbController.handle(message.getText(),message);
+                            }
+                            if (message.getText().equals("❗️ Xatolik kodlari") || profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_Error) && !message.getText().startsWith("/")){
+                                errorController.handle(message.getText(),message);
+                            }
                         }
-                        else if (message.getText() != null && message.getText().startsWith("/")) {
+                        if (message.getText() != null && message.getText().startsWith("/")) {
                             if (message.getText().equals("/start")){
                                 mainController.command(message);
                                 return;

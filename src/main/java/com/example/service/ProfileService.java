@@ -57,7 +57,7 @@ public class ProfileService {
         if (profileRepository.getAdminProfile(message.getChatId()) != null){
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
         }else {
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
         }
         myTelegramBot.sendMsg(sendMessage);
     }

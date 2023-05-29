@@ -85,8 +85,14 @@ public class MainController {
             }
         }
         else if (message.hasContact()){
-            if (profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_phone) || message.getText().startsWith("+998") ) {
+            if (profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Enter_phone) || message.getText().startsWith("+998") && message.getText().length() == 13 ) {
                 adminService.enterPhone(message);
+            }else {
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setReplyMarkup(ReplyKeyboardUtil.phoneKeyboard());
+                sendMessage.setText("Telefon nomerga e'tibor berib \nQayta kiriting!");
+                sendMessage.setChatId(message.getChatId());
+                myTelegramBot.sendMsg(sendMessage);
             }
         }else {
             SendMessage sendMessage = new SendMessage();

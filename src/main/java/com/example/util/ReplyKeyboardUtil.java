@@ -16,14 +16,18 @@ public class ReplyKeyboardUtil {
     }
     public static ReplyKeyboardMarkup menuKeyboard() {
         KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
+        KeyboardButton error = button("❗️ Xatolik kodlari");
         KeyboardButton Suggestions = button("\uD83D\uDCD1 Yo'riqnoma");
         KeyboardRow row1 = new KeyboardRow();
         row1.add(order);
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(Suggestions);
+        row2.add(error);
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(Suggestions);
         List<KeyboardRow> rowList = new LinkedList<>();
         rowList.add(row1);
         rowList.add(row2);
+        rowList.add(row3);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(rowList);
         replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
@@ -56,6 +60,7 @@ public class ReplyKeyboardUtil {
         KeyboardButton PCBBOX = button("\uD83D\uDD0E PCB BOX CODE bo'yicha qidirish");
         KeyboardButton PCB = button("\uD83D\uDD0E PCB CODE bo'yicha qidirish");
         KeyboardButton SAP = button("\uD83D\uDD0E SAP CODE bo'yicha qidirish");
+        KeyboardButton MODEL = button("\uD83D\uDD0E MODEL bo'yicha qidirish");
         KeyboardButton exit = button("\uD83D\uDDD1 Bekor qilish");
         KeyboardRow row1 = new KeyboardRow();
         row1.add(PCBBOX);
@@ -64,12 +69,15 @@ public class ReplyKeyboardUtil {
         KeyboardRow row3 = new KeyboardRow();
         row3.add(SAP);
         KeyboardRow row4 = new KeyboardRow();
-        row4.add(exit);
+        row4.add(MODEL);
+        KeyboardRow row5 = new KeyboardRow();
+        row5.add(exit);
         List<KeyboardRow> rowList = new LinkedList<>();
         rowList.add(row1);
         rowList.add(row2);
         rowList.add(row3);
         rowList.add(row4);
+        rowList.add(row5);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(rowList);
         replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
@@ -80,11 +88,13 @@ public class ReplyKeyboardUtil {
     public static ReplyKeyboardMarkup menuAdmin() {
         KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
         KeyboardButton PCB = button("🔍 PCB qidirish");
+        KeyboardButton error = button("❗️ Xatolik kodlari");
         KeyboardButton Suggestions = button("\uD83D\uDCD1 Yo'riqnoma");
         KeyboardRow row1 = new KeyboardRow();
         row1.add(order);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(PCB);
+        row2.add(error);
         KeyboardRow row3 = new KeyboardRow();
         row3.add(Suggestions);
         List<KeyboardRow> rowList = new LinkedList<>();
@@ -104,6 +114,7 @@ public class ReplyKeyboardUtil {
         KeyboardButton order3 = button("⚙️ Sozlamalar");
         KeyboardButton order4 = button("\uD83D\uDCC1 Base");
         KeyboardButton PCB = button("🔍 PCB qidirish");
+        KeyboardButton error = button("❗️ Xatolik kodlari");
         KeyboardRow row = new KeyboardRow();
         row.add(order);
         KeyboardRow row1 = new KeyboardRow();
@@ -113,6 +124,7 @@ public class ReplyKeyboardUtil {
         row2.add(order4);
         KeyboardRow row3 = new KeyboardRow();
         row3.add(PCB);
+        row3.add(error);
         List<KeyboardRow> rowList = new LinkedList<>();
         rowList.add(row);
         rowList.add(row1);
@@ -125,20 +137,6 @@ public class ReplyKeyboardUtil {
         replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
     }
-    public static ReplyKeyboardMarkup menuKeyboard2() {
-        KeyboardButton order = button("✅ Bloklarning bir biriga mosligini tekshirish");
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(order);
-        List<KeyboardRow> rowList = new LinkedList<>();
-        rowList.add(row1);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setKeyboard(rowList);
-        replyKeyboardMarkup.setResizeKeyboard(true);//buttonni razmerini to'g'irlaydi
-        replyKeyboardMarkup.setSelective(true);// bottinga strelka qoshadi;
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-        return replyKeyboardMarkup;
-    }
-
     public static ReplyKeyboard cancellation() {
         KeyboardButton order = button("\uD83D\uDDD1 Bekor qilish");
         KeyboardRow row1 = new KeyboardRow();

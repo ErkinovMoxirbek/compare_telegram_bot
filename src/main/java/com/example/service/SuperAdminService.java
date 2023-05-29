@@ -3,7 +3,7 @@ package com.example.service;
 import com.example.MyTelegramBot;
 import com.example.dto.AdminProfileDTO;
 import com.example.dto.ConfidentialityDTO;
-import com.example.dto.FileDTO;
+import com.example.dto.ProfileDTO;
 import com.example.dto.SuperAdminProfileDTO;
 import com.example.enums.ProfileStep;
 import com.example.repository.ConfidentialityRepository;
@@ -11,16 +11,11 @@ import com.example.repository.ProfileRepository;
 import com.example.util.InlineKeyBoardUtil;
 import com.example.util.ReplyKeyboardUtil;
 import lombok.AllArgsConstructor;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 @AllArgsConstructor
 public class SuperAdminService {
@@ -40,12 +35,10 @@ public class SuperAdminService {
         }else {
             sendMessage.setChatId(message.getChatId());
             for (AdminProfileDTO a : list){
-                if (a.getVisible()){
-                    count++;
-                    sendMessage.setText("Ism: " + a.getName() + "\nFamiliya: " + a.getSurname() + "\nTelefon nomer: " + a.getPhone());
-                    sendMessage.setReplyMarkup(InlineKeyBoardUtil.deleteAdmin(a.getId(),message.getMessageId()));
-                    myTelegramBot.sendMsg(sendMessage);
-                }
+                count++;
+                sendMessage.setText("Ism: " + a.getName() + "\nFamiliya: " + a.getSurname() + "\nTelefon nomer: " + a.getPhone() + "\nHolati: " + a.getVisible());
+                sendMessage.setReplyMarkup(InlineKeyBoardUtil.deleteAdmin(a.getId(),message.getMessageId()));
+                myTelegramBot.sendMsg(sendMessage);
             }
             if (count == 0){
                 sendMessage.setText("Sizda adminlar yo'q!");
@@ -69,6 +62,9 @@ public class SuperAdminService {
         sendMessage.setChatId(adminId);
         sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
         myTelegramBot.sendMsg(sendMessage);
+        ProfileDTO dto = profileRepository.getProfile(message.getChatId());
+        dto.setStep(ProfileStep.Done);
+        profileRepository.update(dto);
         profileRepository.removeAdmin(Long.valueOf(adminId));
     }
     public void settingsMenu(Message message){
@@ -150,7 +146,7 @@ public class SuperAdminService {
     public void checkAdmin(Long adminId,Message message ){
         SendMessage sendMessage = new SendMessage();
         AdminProfileDTO dto = profileRepository.getAdminProfile(adminId);
-        if (profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(message.getChatId()) == null){
+        if (profileRepository.getAdminProfile(adminId) != null && profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(adminId) == null){
             sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
@@ -159,6 +155,7 @@ public class SuperAdminService {
         }else {
             myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
             dto.setVisible(Boolean.TRUE);
+            dto.setStatus(Boolean.TRUE);
             profileRepository.updateAdmin(dto);
             sendMessage.setChatId(adminId);
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
@@ -172,7 +169,7 @@ public class SuperAdminService {
     }
     public void notCheckAdmin(Long adminId ,Message message){
         SendMessage sendMessage = new SendMessage();
-        if (profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(message.getChatId()) == null){
+        if (profileRepository.getAdminProfile(adminId) != null && profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(adminId) == null){
             sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
@@ -183,7 +180,7 @@ public class SuperAdminService {
             profileRepository.removeAdmin(adminId);
             sendMessage.setChatId(adminId);
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
-            sendMessage.setText("\uD83D\uDE41 Sizni admin sifatida qabul qilmadi!");
+            sendMessage.setText("Sizni adminlik uchun yuborgan so'rovingiz \nsuper admin tomonidan inkor qilindi");
             myTelegramBot.sendMsg(sendMessage);
             sendMessage.setChatId(message.getChatId());
             sendMessage.setText("Bajarildi ✅");

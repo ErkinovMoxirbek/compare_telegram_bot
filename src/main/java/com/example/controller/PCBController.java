@@ -33,24 +33,39 @@ public class PCBController {
             dto.setStep(ProfileStep.Search_PCB);
             profileRepository.update(dto);
         } else if (text.equals("\uD83D\uDD0E PCB BOX CODE bo'yicha qidirish")) {
-            myTelegramBot.sendMsg(sendMessageToUsers("PCB Boxning 14-ta raqamli kodini kiriting!",message));
+            SendMessage sendMessage = sendMessageToUsers("PCB Boxning 14-ta raqamli kodini kiriting!",message);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
             ProfileDTO dto = profileRepository.getProfile(message.getChatId());
             dto.setStep(ProfileStep.Search_PCB_Box_Code);
             profileRepository.update(dto);
         } else if (text.equals("\uD83D\uDD0E PCB CODE bo'yicha qidirish")) {
-            myTelegramBot.sendMsg(sendMessageToUsers("PCBning 14-ta raqamli kodini kiriting!",message));
+            SendMessage sendMessage = sendMessageToUsers("PCBning 14-ta raqamli kodini kiriting!",message);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
             ProfileDTO dto = profileRepository.getProfile(message.getChatId());
             dto.setStep(ProfileStep.Search_PCB_Code);
             profileRepository.update(dto);
         }else if (text.equals("\uD83D\uDD0E SAP CODE bo'yicha qidirish")){
-            myTelegramBot.sendMsg(sendMessageToUsers("SAP Codini kiriting!",message));
+            SendMessage sendMessage = sendMessageToUsers("SAP Codini kiriting!",message);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
             ProfileDTO dto = profileRepository.getProfile(message.getChatId());
             dto.setStep(ProfileStep.Search_SAP_Code);
+            profileRepository.update(dto);
+        } else if (text.equals("\uD83D\uDD0E MODEL bo'yicha qidirish")) {
+            SendMessage sendMessage = sendMessageToUsers("Modelni kiriting! ",message);
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
+            myTelegramBot.sendMsg(sendMessage);
+            ProfileDTO dto = profileRepository.getProfile(message.getChatId());
+            dto.setStep(ProfileStep.Search_MODEL_Code);
             profileRepository.update(dto);
         } else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Box_Code)||
                 profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB_Code)||
                 profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_SAP_Code)) {
-            pcbService.searchPCB(text,message);
+            pcbService.searchPCBByGroup(text,message);
+        } else if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_MODEL_Code)) {
+            pcbService.searchPCBByModel(text,message);
         }
     }
     private SendMessage sendMessageToUsers(String text,Message message){

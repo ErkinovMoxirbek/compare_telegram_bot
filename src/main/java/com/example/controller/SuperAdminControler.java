@@ -58,7 +58,7 @@ public class SuperAdminControler {
                 profileRepository.updateAdmin(adminProfileDTO);
             }
             SendMessage sendMessage = new SendMessage();
-            sendMessage.setText("Bo'limlarni birni tanlang!");
+            sendMessage.setText("Bo'limlardan birini tanlang!");
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);

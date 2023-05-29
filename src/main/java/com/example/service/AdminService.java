@@ -59,7 +59,7 @@ public class AdminService {
             myTelegramBot.sendMsg(sendMessage);
         }else {
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setText("Siz kiritgan ism mantiqga mos emas!\nIltimos, tog'ri shaklda qayta urining!");
+            sendMessage.setText("Iltimos, ism to'g'ri shaklda kiriting!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             myTelegramBot.sendMsg(sendMessage);
         }
@@ -78,7 +78,7 @@ public class AdminService {
             myTelegramBot.sendMsg(sendMessage);
         }else {
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setText("Siz kiritgan familya mantiqga mos emas!\nIltimos, tog'ri shaklda qayta urining!");
+            sendMessage.setText("Iltimos, familiyani to'g'ri shaklda kiriting!");
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
             myTelegramBot.sendMsg(sendMessage);
         }
@@ -91,7 +91,7 @@ public class AdminService {
         profileRepository.updateAdmin(dto);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("Sorovnoma tugadi!\nEndi siz super admin javobini kuting!\n\n /start bosing!");
+        sendMessage.setText("So'rovnoma tugadi!\nEndi siz super admin javobini kuting!\n\n /start bosing!");
         myTelegramBot.sendMsg(sendMessage);
         sendMessage.setReplyMarkup(InlineKeyBoardUtil.getCheck(message.getChatId(),message.getMessageId()));
         sendMessage.setText(dto.getName() + " " + dto.getSurname() + ";\n" + "Telefon nomeri: " + dto.getPhone() + ";\nFoydalanuvchi adminlikni talab qilmoqda!\nQabul qilasizmi?" );

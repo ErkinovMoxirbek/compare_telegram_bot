@@ -36,7 +36,7 @@ public class PCBRepository {
                     switch (cell.getColumnIndex()) {
                         case 0 -> pcbdto.setId(dataFormatter.formatCellValue(cell));
                         case 1 -> pcbdto.setGroup(dataFormatter.formatCellValue(cell));
-                        case 2 -> pcbdto.setName(dataFormatter.formatCellValue(cell));
+                        case 2 -> pcbdto.setSModel(dataFormatter.formatCellValue(cell));
                         case 3 ->{
                             pcbdto.setPCBBoxCodeAssembly(dataFormatter.formatCellValue(cell));
                             if (dataFormatter.formatCellValue(cell).length() > 13){
@@ -54,7 +54,27 @@ public class PCBRepository {
                             }
                         }
                         case 5 -> pcbdto.setSAPCode(dataFormatter.formatCellValue(cell));
-                        //case 6 -> pcbdto.setModel(dataFormatter.formatCellValue(cell));
+                        case 6 -> pcbdto.setModel(dataFormatter.formatCellValue(cell));
+                        default -> {
+                        }
+                    }
+                }
+                list.add(pcbdto);
+            }if (a == 0){
+                PCBDTO pcbdto = new PCBDTO();
+                for (Cell cell : row) {
+                    switch (cell.getColumnIndex()) {
+                        case 0 -> pcbdto.setIdName(dataFormatter.formatCellValue(cell));
+                        case 1 -> pcbdto.setGroupName(dataFormatter.formatCellValue(cell));
+                        case 2 -> pcbdto.setSname(dataFormatter.formatCellValue(cell));
+                        case 3 ->{
+                            pcbdto.setPCBBoxCodeAssemblyName(dataFormatter.formatCellValue(cell));
+                        }
+                        case 4 ->{
+                            pcbdto.setPCBCodeWholeName(dataFormatter.formatCellValue(cell));
+                        }
+                        case 5 -> pcbdto.setSAPCodeName(dataFormatter.formatCellValue(cell));
+                        case 6 -> pcbdto.setModelName(dataFormatter.formatCellValue(cell));
                         default -> {
                         }
                     }
@@ -68,15 +88,27 @@ public class PCBRepository {
     public PCBDTO getInfoExelByPCBBoxCode(String code){
         List<PCBDTO> list = getListExel();
         for (PCBDTO e : list){
-            if (e.getPCBBoxCode().equals(code)){
+            if ( e.getPCBBoxCode() != null && e.getPCBBoxCode().equalsIgnoreCase(code)){
                 return e;
             }
+        }
+        return null;
+    }
+    public PCBDTO getInfoExelByPCBModel(String model){
+        List<PCBDTO> list = getListExel();
+        int a = 0;
+        for (PCBDTO e : list){
+            if (null == e.getModel() || a==0) {
+                a++;
+                continue;
+            }
+            if (e.getModel().toLowerCase().contains(model))return e;
         }
         return null;
     } public PCBDTO getInfoExelByPCBCode(String code){
         List<PCBDTO> list = getListExel();
         for (PCBDTO e : list){
-            if (e.getPCBCode().equals(code)){
+            if (e.getPCBBoxCode() != null && e.getPCBCode().equalsIgnoreCase(code)){
                 return e;
             }
         }
@@ -85,7 +117,7 @@ public class PCBRepository {
     public PCBDTO getInfoExelBySAPCode(String code){
         List<PCBDTO> list = getListExel();
         for (PCBDTO e : list){
-            if (e.getSAPCode().equals(code)){
+            if (e.getPCBBoxCode() != null && e.getSAPCode().equalsIgnoreCase(code)){
                 return e;
             }
         }

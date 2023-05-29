@@ -7,12 +7,19 @@ import lombok.ToString;
 @Getter @Setter @ToString
 public class PCBDTO {
     private String id;
+    private String idName;
     private String group;
-    private String name;
+    private String groupName;
+    private String Sname;
+    private String SModel;
     private String PCBBoxCodeAssembly;
+    private String PCBBoxCodeAssemblyName;
     private String PCBCodeWhole;
+    private String PCBCodeWholeName;
     private String PCBBoxCode;
     private String PCBCode;
     private String SAPCode;
-    //private String model;
+    private String SAPCodeName;
+    private String model;
+    private String modelName;
 }

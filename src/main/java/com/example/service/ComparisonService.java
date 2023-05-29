@@ -114,12 +114,12 @@ public class ComparisonService {
                 }
             }
             else{
-                sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+                sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
             }
             myTelegramBot.sendMsg(sendMessage);
         }else {
             sendMessage.setText("⛔️Bu ichki va tashqi bloklar bir biriga mos kelmaydi.");
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard2());
+            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());
             myTelegramBot.sendMsg(sendMessage);
         }
         ProfileDTO entity = profileRepository.getProfile(message.getChatId());

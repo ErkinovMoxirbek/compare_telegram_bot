@@ -113,6 +113,7 @@ public class ReplyKeyboardUtil {
         KeyboardButton order2 = button("\uD83D\uDC64 Adminlarim");
         KeyboardButton order3 = button("⚙️ Sozlamalar");
         KeyboardButton order4 = button("\uD83D\uDCC1 Base");
+        KeyboardButton messageAll = button("✉️ Xabar jo'natish");
         KeyboardButton PCB = button("🔍 PCB qidirish");
         KeyboardButton error = button("❗️ Xatolik kodlari");
         KeyboardRow row = new KeyboardRow();
@@ -122,6 +123,7 @@ public class ReplyKeyboardUtil {
         row1.add(order3);
         KeyboardRow row2 = new KeyboardRow();
         row2.add(order4);
+        row2.add(messageAll) ;
         KeyboardRow row3 = new KeyboardRow();
         row3.add(PCB);
         row3.add(error);

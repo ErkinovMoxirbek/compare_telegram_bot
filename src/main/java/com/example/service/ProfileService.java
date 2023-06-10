@@ -43,6 +43,8 @@ public class ProfileService {
                 "deb javob qaytaradi !");
         myTelegramBot.sendMsg(sendMessage);
         sendPhoto.setCaption("Tashqi qism seriya raqamidan , ramka bilan ajratilgan birinchi 8 ta belgini kiriting (113ABCDE)");
+        file = new InputFile(new File("seriya-photo2.jpg"));
+        sendPhoto.setPhoto(file);
         myTelegramBot.sendMsg(sendPhoto);
         sendMessage.setText("Agar siz kiritgan seriya raqamidagi bloklar bir biriga mos kelsa bot sizga -\n" +
                 "✅ Bu ichki va tashqi bloklar bir biriga mos keladi.\n" +
@@ -54,7 +56,7 @@ public class ProfileService {
                 "Yoki botdan :\n" +
                 "⚠️ Iltimos tashqi blok seriya raqamining ilk 8 ta belgisini to'g'ri kiriting:\n" +
                 "degan javob olasiz\uD83D\uDE09");
-        if (profileRepository.getAdminProfile(message.getChatId()) != null){
+        if (profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getVisible()){
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuAdmin());
         }else {
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuKeyboard());

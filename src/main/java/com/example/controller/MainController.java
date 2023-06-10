@@ -134,7 +134,12 @@ public class MainController {
             }
         }
         else if (message.getText().equals("/super_admin")) {
-            if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) && profileRepository.getAdminProfile(message.getChatId()) != null && profileRepository.getAdminProfile(message.getChatId()).getVisible() || profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) && profileRepository.getAdminProfile(message.getChatId()) == null){
+            if (profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) &&
+                    profileRepository.getAdminProfile(message.getChatId()) != null &&
+                    !profileRepository.getAdminProfile(message.getChatId()).getStatus() ||
+                    profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) &&
+                            profileRepository.getAdminProfile(message.getChatId()) != null &&
+                    profileRepository.getAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)){
                 superAdminService.login(message);
             }
         }

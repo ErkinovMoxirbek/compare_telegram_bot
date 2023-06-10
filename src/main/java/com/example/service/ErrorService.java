@@ -21,7 +21,7 @@ public class ErrorService {
             dto = errorRepository.getInfoExelByCode(text);
         }
         if (dto != null && dto.getErrorCode().equalsIgnoreCase(text)){
-            myTelegramBot.sendMsg(sendMessageToUser(dto.getKondisanerModel() + "\n\n" +dto.getErrorInfo() + "\n\n" + dto.getCorrectionSequence(),message));
+            myTelegramBot.sendMsg(sendMessageToUser(errorRepository.getListExel().get(0).getKondisanerModelName() + ": \n" + dto.getKondisanerModel() + "\n\n" + errorRepository.getListExel().get(0).getMeaningCodeName() + ": \n" + dto.getMeaningCode() + "\n\n" + errorRepository.getListExel().get(0).getErrorInfoName() + ": \n" + dto.getErrorInfo() + "\n\n" + errorRepository.getListExel().get(0).getCorrectionSequenceName() + ": \n" + dto.getCorrectionSequence(),message));
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());

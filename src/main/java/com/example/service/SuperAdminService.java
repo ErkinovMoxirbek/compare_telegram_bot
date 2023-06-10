@@ -147,9 +147,8 @@ public class SuperAdminService {
         SendMessage sendMessage = new SendMessage();
         AdminProfileDTO dto = profileRepository.getAdminProfile(adminId);
         if (profileRepository.getAdminProfile(adminId) != null && profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(adminId) == null){
-            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
+            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bo'lingan!");
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);
             myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
         }else {
@@ -170,9 +169,8 @@ public class SuperAdminService {
     public void notCheckAdmin(Long adminId ,Message message){
         SendMessage sendMessage = new SendMessage();
         if (profileRepository.getAdminProfile(adminId) != null && profileRepository.getAdminProfile(adminId).getVisible() || profileRepository.getAdminProfile(adminId) == null){
-            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bol'ingan!");
+            sendMessage.setText("Bu faydalanuvchi boshqa super admin tomonidan tasdiqlanib bo'lingan!");
             sendMessage.setChatId(message.getChatId());
-            sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());
             myTelegramBot.sendMsg(sendMessage);
             myTelegramBot.deleteMsg(new DeleteMessage(message.getChatId().toString(),message.getMessageId()));
         }else {

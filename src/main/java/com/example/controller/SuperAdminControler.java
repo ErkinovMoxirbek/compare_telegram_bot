@@ -136,6 +136,9 @@ public class SuperAdminControler {
             myTelegramBot.sendMsg(sendMessage);
         } else if (message.getText().equals("/admin") &&
                 profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) &&
+                profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done) ||
+                message.getText().equals("/super_admin") &&
+                profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Done) &&
                 profileRepository.getSuperAdminProfile(message.getChatId()).getStep().equals(ProfileStep.Done)) {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setReplyMarkup(ReplyKeyboardUtil.menuSuperAdmin());

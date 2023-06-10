@@ -301,7 +301,11 @@ public class FileHandlerService {
                         fileName = time.replace(':', '_') + ".jpg"; // Fayl nomini o'zgartiring
                     } else {
                         fileId = message.getVideo().getFileId();
-                        fileName = message.getVideo().getFileName(); // Fayl nomini o'zgartiring
+                        if (message.getVideo().getFileName() != null){
+                            fileName = message.getVideo().getFileName(); // Fayl nomini o'zgartiring
+                        }else {
+                            fileName = "VID_" + UUID.randomUUID();
+                        }
                     }
 
                     String filePath = getFilePath(fileId);

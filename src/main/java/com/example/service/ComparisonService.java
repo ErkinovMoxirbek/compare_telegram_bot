@@ -47,9 +47,7 @@ public class ComparisonService {
         sendMessage.setChatId(message.getChatId());
         if (entity.getStep().equals(ProfileStep.Save_Internal_Block)){
             if (message.getText().length() == 8){
-                String text = message.getText().substring(3);
-                System.out.println(text);
-                internalBlock = internalBlockRepository.getInfoExel(text.toLowerCase());
+                internalBlock = internalBlockRepository.getInfoExel(message.getText().toLowerCase());
 
                 if (internalBlock == null){
                     sendMessage.setText("⛔️ Ichki blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
@@ -77,8 +75,7 @@ public class ComparisonService {
 
         }else if (entity.getStep().equals(ProfileStep.Save_External_Block)){
             if (message.getText().length() == 8){
-                String text = message.getText().substring(3);
-                externalBlock = externalBlockRepository.getInfoExel(text.toLowerCase());
+                externalBlock = externalBlockRepository.getInfoExel(message.getText().toLowerCase());
                 if (externalBlock == null){
                     sendMessage.setText("⛔️ Tashqi blok topilmadi! \n\uD83D\uDD04 Qayta urining!");
                     sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());

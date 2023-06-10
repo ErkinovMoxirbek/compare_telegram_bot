@@ -33,16 +33,17 @@ public class AdminService {
         AdminProfileDTO dto = new AdminProfileDTO();
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId());
-        sendMessage.setText("Siz admin emasiz!");
+        sendMessage.setText("Siz admin emassiz!");
         sendMessage.setReplyMarkup(ReplyKeyboardUtil.cancellation());
         myTelegramBot.sendMsg(sendMessage);
         sendMessage.setText("Admin bo'lishni istasangiz!");
         myTelegramBot.sendMsg(sendMessage);
         sendMessage.setText("So'rovnomani to'ldiring!");
         myTelegramBot.sendMsg(sendMessage);
-        sendMessage.setText("Ismingizni kiritng :");
+        sendMessage.setText("Ismingizni kiriting :");
         dto.setId(message.getChatId());
         dto.setStep(ProfileStep.Enter_name);
+        dto.setStatus(true);
         profileRepository.saveAdmin(dto);
         myTelegramBot.sendMsg(sendMessage);
     }

@@ -60,7 +60,7 @@ public class PCBRepository {
                     }
                 }
                 list.add(pcbdto);
-            }if (a == 0){
+            }else if (a == 0){
                 PCBDTO pcbdto = new PCBDTO();
                 for (Cell cell : row) {
                     switch (cell.getColumnIndex()) {
@@ -117,7 +117,7 @@ public class PCBRepository {
     public PCBDTO getInfoExelBySAPCode(String code){
         List<PCBDTO> list = getListExel();
         for (PCBDTO e : list){
-            if (e.getPCBBoxCode() != null && e.getSAPCode().equalsIgnoreCase(code)){
+            if (e.getPCBBoxCode() != null && e.getSAPCode().toLowerCase().contains(code.toLowerCase())){
                 return e;
             }
         }

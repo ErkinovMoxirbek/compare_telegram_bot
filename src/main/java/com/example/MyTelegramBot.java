@@ -9,6 +9,7 @@ import com.example.repository.*;
 import com.example.service.*;
 import com.example.util.ReplyKeyboardUtil;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -43,15 +44,17 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private CategoryService categoryService = new CategoryService(profileService,profileRepository,this);
     private MainController mainController  = new MainController(profileRepository,profileService,comparisonService,this,adminService,categoryService,superAdminService);
     private AdminController adminController = new AdminController(this,profileRepository,confidentialityRepository,fileHandlerService,comparisonService,profileService,superAdminService);
+    private TokenRepository tokenRepository = new TokenRepository();
+    private SendAllMessageService sendAllMessageService = new SendAllMessageService(this,profileRepository,tokenRepository);
 
     @Override
     public String getBotUsername() {
-        return "MIXDhelper_bot";
+        return tokenRepository.get("token").getUser();
     }
 
     @Override
     public String getBotToken() {
-        return "1793820753:AAGTT-mFXQR_3XhL8857g5NMK0BsCiznIqQ";
+        return tokenRepository.get("token").getToken();
     }
     @Override
     public void onUpdateReceived(Update update) {
@@ -65,6 +68,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                     }
                     if (update.getMessage().getChatId().equals(dto.getId())){
                         Message message = update.getMessage();
+                        if (message.hasVideo() && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Send) || message.hasPhoto()&& profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Send) ){
+                            sendAllMessageService.handle(message.getText(),message);
+                            return;
+                        }
+                        if (message.getText() != null && !message.getText().equals("\uD83D\uDDD1 Bekor qilish") && message.getText().equals("✉️ Xabar jo'natish") || message.getText() != null && !message.getText().equals("\uD83D\uDDD1 Bekor qilish") && profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Send)  ){
+                            sendAllMessageService.handle(message.getText(),message);
+                            return;
+                        }
                         if ( message.getText() != null && !message.getText().equals("\uD83D\uDDD1 Bekor qilish") && !message.getText().startsWith("/")){
                             if (message.getText() != null && message.getText().equals("\uD83D\uDD0D PCB qidirish") ||
                                     profileRepository.getProfile(message.getChatId()).getStep().equals(ProfileStep.Search_PCB) && !message.getText().startsWith("/") ||
@@ -160,6 +171,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             e.printStackTrace();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
         }
     }
     //Embedding information in sending a message
@@ -177,6 +190,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+    public void forwardMessage(ForwardMessage method) throws TelegramApiException {
+         execute(method);
     }
     public Message sendMsg(SendMessage method) {
         try {
